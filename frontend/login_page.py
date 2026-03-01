@@ -46,7 +46,7 @@ def show_login_page():
     col1, col2 = st.columns([1, 14], vertical_alignment="center")
     
     with col1:
-        st.image("assets/gbi2_logo.svg", width=70) # Adjust width as needed
+        st.image("frontend/assets/gbi2_logo.svg", width=70) # Adjust width as needed
         
     with col2:
         # Using HTML here removes the default heavy padding above st.title
