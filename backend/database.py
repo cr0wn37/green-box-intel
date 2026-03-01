@@ -1,27 +1,25 @@
 import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
-import streamlit as st
+
 
 load_dotenv()
 
-@st.cache_resource
 def init_connection() -> Client:
+    # 2. Use os.getenv to pull from Render's Environment Variables
     url = os.getenv("SUPABASE_URL")
-    # Make sure this matches the exact string in your .env file
     key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
     
-    # Debug print (removes this after it works!)
-    if not key:
-        print("DEBUG: SUPABASE_SERVICE_ROLE_KEY is None! Check your .env file.")
-    
+    # 3. Use standard Python logging/prints instead of st.error
     if not url or not key:
-        st.error("Supabase URL or Service Role Key missing!")
-        st.stop()
+        print("CRITICAL ERROR: Supabase URL or Service Role Key missing from Environment Variables!")
+        # In a backend, we raise an error to stop the server from starting in a broken state
+        raise ValueError("Missing Supabase credentials")
         
     return create_client(url, key)
 
-supabase = init_connection()
+# 4. Initialize the client once so other files can import it
+supabase: Client = init_connection()
 
 class DatabaseManager:
     def __init__(self):
