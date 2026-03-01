@@ -10,3 +10,4 @@ spacy
 streamlit
 supabase
 boto3
+pymupdf
