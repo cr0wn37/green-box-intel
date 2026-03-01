@@ -17,7 +17,7 @@ def show_landing_page():
     # ==========================================
     # 1. STANDALONE GLASS NAVBAR COMPONENT
     # ==========================================
-    image_path = "assets/gbi3_logo.png" 
+    image_path = "frontend/assets/gbi3_logo.png" 
     with open(image_path, "rb") as f:
         img_b64 = base64.b64encode(f.read()).decode()
 

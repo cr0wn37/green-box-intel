@@ -328,7 +328,7 @@ def show_dashboard():
     except Exception:
         pass
 
-    with open("assets/gbi3_logo.png", "rb") as f:
+    with open("frontend/assets/gbi3_logo.png", "rb") as f:
         img_b64 = base64.b64encode(f.read()).decode()
 
     st.sidebar.markdown(f"""
