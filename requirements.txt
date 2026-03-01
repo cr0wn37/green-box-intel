@@ -7,3 +7,6 @@ presidio-anonymizer
 pdfplumber
 python-dotenv
 spacy
+streamlit
+supabase
+boto3
