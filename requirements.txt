@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-multipart
+anthropic
+presidio-analyzer
+presidio-anonymizer
+pdfplumber
+python-dotenv
+spacy

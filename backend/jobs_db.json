@@ -1,0 +1,17 @@
+{
+    "6c6d2fa1-1eb4-4dfb-8b49-dea7863bb073": {
+        "status": "Completed",
+        "filename": "Miller_Supplemental_MRI.pdf, Miller_Initial_Records.pdf",
+        "timestamp": "2026-02-13T23:40:42.955731",
+        "pages": 2,
+        "case_name": "old cas",
+        "file_list": [
+            "Miller_Supplemental_MRI.pdf",
+            "Miller_Initial_Records.pdf"
+        ],
+        "chronology": "# EXECUTIVE CASE SUMMARY\nThe patient, <PERSON_1>, suffered a right shoulder injury after slipping on ice, resulting in a contusion/sprain and later diagnosed with a full-thickness tear of the supraspinatus tendon (Rotator Cuff) with retraction. The patient underwent conservative treatment but showed no improvement, leading to a scheduled Right Shoulder Arthroscopy with Rotator Cuff Repair. The total new charges for the treatments and procedures amount to $17,950.00, with an additional $400.00 from the initial urgent care visit.\n\n# MEDICAL CHRONOLOGY TABLE\n| Date | Description | Source |\n| --- | --- | --- |\n| January 15, 2024 | Initial urgent care visit for right shoulder pain after slipping on ice | Miller_Initial_Records.pdf - Page 1 |\n| January 15, 2024 | X-Ray of right shoulder showing no acute fracture or dislocation | Miller_Initial_Records.pdf - Page 1 |\n| March 8, 2024 | MRI of right shoulder showing full-thickness tear of the supraspinatus tendon | Miller_Supplemental_MRI.pdf - Page 1 |\n| March 10, 2024 | Follow-up visit with orthopedic specialist, surgery scheduled | Miller_Supplemental_MRI.pdf - Page 1 |\n| March 15, 2024 | Pre-pay for surgical deposit (arthroscopy) | Miller_Supplemental_MRI.pdf - Page 1 |\n\n# MEDICAL BILLING LEDGER\n| Date of Service | Provider | Description of Service | Amount Billed |\n| --- | --- | --- | --- |\n| 01/15/2024 | City Urgent Care | Office Visit Level 3 (99203) | $250.00 |\n| 01/15/2024 | City Urgent Care | X-Ray Shoulder (73030) | $150.00 |\n| 03/08/2024 | Ortho Specialists | MRI Right Shoulder | $2,500.00 |\n| 03/10/2024 | Ortho Specialists | Specialist Consultation | $450.00 |\n| 03/15/2024 | Ortho Specialists | Surgical Deposit (Arthroscopy) | $15,000.00 |\n\n# INJURY HIGHLIGHTS\n* Full-thickness tear of the supraspinatus tendon (Rotator Cuff) with retraction (Miller_Supplemental_MRI.pdf - Page 1)\n* AC joint hypertrophy (Miller_Supplemental_MRI.pdf - Page 1)\n* Limited range of motion due to pain (Miller_Initial_Records.pdf - Page 1)\n* Mild degenerative changes noted on X-Ray (Miller_Initial_Records.pdf - Page 1)\n* No acute fracture or dislocation on initial X-Ray (Miller_Initial_Records.pdf - Page 1)\n\n# TOTAL COST\nTOTAL_LIST: [250.00, 150.00, 2500.00, 450.00, 15000.00]",
+        "total_billed": 18350.0,
+        "redactions_count": 3,
+        "has_chat": true
+    }
+}

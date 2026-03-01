@@ -1,0 +1,50 @@
+[Miller_Initial_Records.pdf - Page 1]: URGENT CARE CENTER - VISIT NOTE Date of Service: January 15, 2024 Patient: <PERSON_{index}>
+[Miller_Initial_Records.pdf - Page 1]: <PERSON_{index}> (DOB: 05/12/1978) Chief Complaint: Right shoulder pain after slipping on ice.
+[Miller_Initial_Records.pdf - Page 1]: History of Present Illness: Patient states he slipped on black ice while pumping gas this
+[Miller_Initial_Records.pdf - Page 1]: morning. Landed directly on right shoulder. complains of 6/10 pain.
+[Miller_Initial_Records.pdf - Page 1]: Physical Exam:
+[Miller_Initial_Records.pdf - Page 1]: Right Shoulder: Tenderness to palpation. Range of motion limited by pain. No
+[Miller_Initial_Records.pdf - Page 1]: obvious deformity.
+[Miller_Initial_Records.pdf - Page 1]: Neuro: Sensation intact.
+[Miller_Initial_Records.pdf - Page 1]: Imaging (X-Ray):
+[Miller_Initial_Records.pdf - Page 1]: Views: AP and Lateral Right Shoulder.
+[Miller_Initial_Records.pdf - Page 1]: Findings: No acute fracture or dislocation. Mild degenerative changes noted.
+[Miller_Initial_Records.pdf - Page 1]: Assessment & Plan:
+[Miller_Initial_Records.pdf - Page 1]: 1. Right Shoulder Contusion / Sprain.
+[Miller_Initial_Records.pdf - Page 1]: 2. Prescribed Ibuprofen 800mg.
+[Miller_Initial_Records.pdf - Page 1]: 3. Refer to Physical Therapy if pain persists > 2 weeks.
+[Miller_Initial_Records.pdf - Page 1]: 4. Discharge home.
+[Miller_Initial_Records.pdf - Page 1]: BILLING STATEMENT
+[Miller_Initial_Records.pdf - Page 1]: Provider: City Urgent Care
+[Miller_Initial_Records.pdf - Page 1]: Date: 01/15/2024
+[Miller_Initial_Records.pdf - Page 1]: Service: Office Visit Level 3 (99203) - $250.00
+[Miller_Initial_Records.pdf - Page 1]: Service: X-Ray Shoulder (73030) - $150.00
+[Miller_Initial_Records.pdf - Page 1]: Total Charges: $400.00
+
+--- SUPPLEMENTAL DATA ADDED ---
+
+
+--- DOCUMENT: Miller_Supplemental_MRI.pdf ---
+[Miller_Supplemental_MRI.pdf - Page 1]: ORTHOPEDIC SPECIALISTS OF BOSTON Date of Service: March 10, 2024 Patient: <PERSON_{index}>[Miller_Supplemental_MRI.pdf - Page 1]: Miller Reason for Visit: Follow-up. MRI Review.
+[Miller_Supplemental_MRI.pdf - Page 1]: Note: Patient returns today reporting zero improvement with PT. Pain is now 8/10 and he
+[Miller_Supplemental_MRI.pdf - Page 1]: cannot lift his arm above shoulder height. We ordered an MRI last week.
+[Miller_Supplemental_MRI.pdf - Page 1]: MRI REPORT (Review):
+[Miller_Supplemental_MRI.pdf - Page 1]: Date of Exam: March 08, 2024
+[Miller_Supplemental_MRI.pdf - Page 1]: Findings: Full-thickness tear of the supraspinatus tendon (Rotator Cuff) with
+[Miller_Supplemental_MRI.pdf - Page 1]: retraction. AC joint hypertrophy.
+[Miller_Supplemental_MRI.pdf - Page 1]: Assessment:
+[Miller_Supplemental_MRI.pdf - Page 1]: 1. Right Rotator Cuff Tear (Traumatic).
+[Miller_Supplemental_MRI.pdf - Page 1]: 2. Failed conservative treatment.
+[Miller_Supplemental_MRI.pdf - Page 1]: Plan:
+[Miller_Supplemental_MRI.pdf - Page 1]: Surgery is now indicated. Scheduled Right Shoulder Arthroscopy with Rotator Cuff
+[Miller_Supplemental_MRI.pdf - Page 1]: Repair for next Tuesday.
+[Miller_Supplemental_MRI.pdf - Page 1]: discussed risks/benefits. Consent signed.
+[Miller_Supplemental_MRI.pdf - Page 1]: BILLING LEDGER
+[Miller_Supplemental_MRI.pdf - Page 1]: Provider: Ortho Specialists
+[Miller_Supplemental_MRI.pdf - Page 1]: Date: 03/08/2024
+[Miller_Supplemental_MRI.pdf - Page 1]: Description: MRI Right Shoulder - $2,500.00
+[Miller_Supplemental_MRI.pdf - Page 1]: Date: 03/10/2024
+[Miller_Supplemental_MRI.pdf - Page 1]: Description: Specialist Consultation - $450.00
+[Miller_Supplemental_MRI.pdf - Page 1]: Date: 03/15/2024 (Pre-pay)
+[Miller_Supplemental_MRI.pdf - Page 1]: Description: Surgical Deposit (Arthroscopy) - $15,000.00
+[Miller_Supplemental_MRI.pdf - Page 1]: Total New Charges: $17,950.00

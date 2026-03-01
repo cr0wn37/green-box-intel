@@ -1,0 +1,259 @@
+[pat half 1.pdf - Page 1]: PAGE 1
+[pat half 1.pdf - Page 1]: PAT1ENT DEMOGRAPHICS
+[pat half 1.pdf - Page 1]: Hosp1tal: MetropOlitan General (SIMULATED)
+[pat half 1.pdf - Page 1]: Patlent ID: Pati3nt-A-00091
+[pat half 1.pdf - Page 1]: Narne: ANONYMOUS PATIENT
+[pat half 1.pdf - Page 1]: G3nder: Female
+[pat half 1.pdf - Page 1]: Ag3: 34 yrs
+[pat half 1.pdf - Page 1]: DOB: 1991-01-14
+[pat half 1.pdf - Page 1]: Insurance: Pr1vate Auto/Health (Sim.)
+[pat half 1.pdf - Page 1]: Addr3ss: ***** WITHHELD *****
+[pat half 1.pdf - Page 1]: ***THIS IS A FICTIONAL RECORD***
+[pat half 1.pdf - Page 1]: PAGE 2
+[pat half 1.pdf - Page 1]: EMERGENCY DEPT. INTAKE NOTE
+[pat half 1.pdf - Page 1]: Date: 08/03/25 T1me: 19:42
+[pat half 1.pdf - Page 1]: Ch1ef COmplaint:
+[pat half 1.pdf - Page 1]: MOtor Veh1cle Co11ision (MVC)
+[pat half 1.pdf - Page 1]: Mechanism:
+[pat half 1.pdf - Page 1]: Rear-ended @ traff1c signal
+[pat half 1.pdf - Page 1]: Approx speed ~45mph
+[pat half 1.pdf - Page 1]: Seatbelt: YES
+[pat half 1.pdf - Page 1]: Airbag: DEPLOYED
+[pat half 1.pdf - Page 1]: LOC: Br1ef (<1 min) per EMS
+[pat half 1.pdf - Page 1]: Tr1age Level: ESl-2
+[pat half 1.pdf - Page 1]: PAGE 3
+[pat half 1.pdf - Page 1]: EMS PRE-HOSP1TAL R3PORT
+[pat half 1.pdf - Page 1]: Scene:
+[pat half 1.pdf - Page 2]: Pat1ent alert but confused
+[pat half 1.pdf - Page 2]: No extr1cat1on tools used
+[pat half 1.pdf - Page 2]: V1tals @ scene:
+[pat half 1.pdf - Page 2]: BP 142/88
+[pat half 1.pdf - Page 2]: HR 112
+[pat half 1.pdf - Page 2]: RR 22
+[pat half 1.pdf - Page 2]: Sp02 96% (RA)
+[pat half 1.pdf - Page 2]: Intervent1ons:
+[pat half 1.pdf - Page 2]: C-collar applled
+[pat half 1.pdf - Page 2]: IV establ1shed L forearm
+[pat half 1.pdf - Page 2]: <PERSON_{index}> g1ven
+[pat half 1.pdf - Page 2]: PAGE 4
+[pat half 1.pdf - Page 2]: INITIAL PHYS1CAL EXAM
+[pat half 1.pdf - Page 2]: GEN: Moderate distress
+[pat half 1.pdf - Page 2]: HEAD: Scalp contus1on noted
+[pat half 1.pdf - Page 2]: NECK: Mldline tendern3ss
+[pat half 1.pdf - Page 2]: CHEST: L chest wall pain
+[pat half 1.pdf - Page 2]: ABD: Soft, mild RUQ pain
+[pat half 1.pdf - Page 2]: EXT: L wrist deformlty
+[pat half 1.pdf - Page 2]: NEURO: GCS = 14 (E4V4M6)
+[pat half 1.pdf - Page 2]: PAGE 5
+[pat half 1.pdf - Page 2]: VITALS TREND
+[pat half 1.pdf - Page 2]: T1ME BP
+[pat half 1.pdf - Page 2]: HR RR Sp02 TEMP
+[pat half 1.pdf - Page 2]: 19:45 142/88 112 22 96% 37.1C
+[pat half 1.pdf - Page 2]: 20:15 138/84 104 20 97% 37.0C
+[pat half 1.pdf - Page 3]: 21:00 130/80 96 18 98% 36.9C
+[pat half 1.pdf - Page 3]: *handwritten note in margin*
+[pat half 1.pdf - Page 3]: "pt calmer"
+[pat half 1.pdf - Page 3]: PAGE 6
+[pat half 1.pdf - Page 3]: IMAGING ORDERS (TRAUMA)
+[pat half 1.pdf - Page 3]: [X] CT HEAD w/o contrast
+[pat half 1.pdf - Page 3]: [X] CT C-SPINE
+[pat half 1.pdf - Page 3]: [X] CT CHEST/ABD/PELVIS
+[pat half 1.pdf - Page 3]: [X] XRAY - LEFT WRIST
+[pat half 1.pdf - Page 3]: Orderlng MD: <PERSON_{index}>, <LOCATION_{index}>
+[pat half 1.pdf - Page 3]: PAGE 7
+[pat half 1.pdf - Page 3]: CT HEAD REPORT
+[pat half 1.pdf - Page 3]: Radlology Dept.
+[pat half 1.pdf - Page 3]: Findings:
+[pat half 1.pdf - Page 3]: No acute hemorrhage
+[pat half 1.pdf - Page 3]: No mass effect
+[pat half 1.pdf - Page 3]: Impression:
+[pat half 1.pdf - Page 3]: NEG for acute bleed
+[pat half 1.pdf - Page 3]: Mlld concussion suspected
+[pat half 1.pdf - Page 3]: PAGE 8
+[pat half 1.pdf - Page 3]: CT CERVICAL SPINE
+[pat half 1.pdf - Page 3]: Findings:
+[pat half 1.pdf - Page 3]: No fracture or subluxatlon
+[pat half 1.pdf - Page 3]: Loss of lordosls
+[pat half 1.pdf - Page 3]: Impression:
+[pat half 1.pdf - Page 3]: Cervical stra 1n llkely
+[pat half 1.pdf - Page 4]: PAGE 9
+[pat half 1.pdf - Page 4]: CT CHEST / ABDOMEN / PELVIS
+[pat half 1.pdf - Page 4]: CHEST:
+[pat half 1.pdf - Page 4]: L r1b fractures (6th,7th)
+[pat half 1.pdf - Page 4]: Non-displaced
+[pat half 1.pdf - Page 4]: ABDOMEN:
+[pat half 1.pdf - Page 4]: No solld organ injury
+[pat half 1.pdf - Page 4]: PELVIS:
+[pat half 1.pdf - Page 4]: No acute fracture
+[pat half 1.pdf - Page 4]: PAGE 10
+[pat half 1.pdf - Page 4]: X-RAY - LEFT WRIST
+[pat half 1.pdf - Page 4]: Findings:
+[pat half 1.pdf - Page 4]: Distal radlus fracture
+[pat half 1.pdf - Page 4]: Mlld displacement
+[pat half 1.pdf - Page 4]: Impression:
+[pat half 1.pdf - Page 4]: Closed fracture
+[pat half 1.pdf - Page 4]: Ortho consult rec'd
+
+--- SUPPLEMENTAL DATA ADDED ---
+
+
+--- DOCUMENT: pat half 2.pdf ---
+[pat half 2.pdf - Page 1]: PAGE 11
+[pat half 2.pdf - Page 1]: LABORATORY RESULTS
+[pat half 2.pdf - Page 1]: CBC:
+[pat half 2.pdf - Page 1]: WBC 13.2 H
+[pat half 2.pdf - Page 1]: Hgb 12.4
+[pat half 2.pdf - Page 1]: Plt 278
+[pat half 2.pdf - Page 1]: CMP: WNL
+[pat half 2.pdf - Page 1]: Et0H: NEG
+[pat half 2.pdf - Page 1]: UA: NEG for blood
+[pat half 2.pdf - Page 1]: PAGE 12
+[pat half 2.pdf - Page 1]: ORTHOPEDIC CONSULT
+[pat half 2.pdf - Page 1]: Dx:
+[pat half 2.pdf - Page 1]: Closed distal radlus fx
+[pat half 2.pdf - Page 1]: Plan:
+[pat half 2.pdf - Page 1]: Closed reductlon
+[pat half 2.pdf - Page 1]: Sugar-tong spllnt
+[pat half 2.pdf - Page 1]: Outpt f/u
+[pat half 2.pdf - Page 1]: PAGE 13
+[pat half 2.pdf - Page 1]: <PERSON_{index}> CONSULT
+[pat half 2.pdf - Page 1]: Assessment:
+[pat half 2.pdf - Page 1]: Mlld TBI / Concusslon
+[pat half 2.pdf - Page 1]: Recs:
+[pat half 2.pdf - Page 1]: Cognltive rest
+[pat half 2.pdf - Page 1]: No drlving x72 hrs
+[pat half 2.pdf - Page 1]: F/U 1 wk
+[pat half 2.pdf - Page 1]: PAGE 14
+[pat half 2.pdf - Page 2]: PAIN MGMT
+[pat half 2.pdf - Page 2]: Meds g1ven:
+[pat half 2.pdf - Page 2]: <PERSON_{index}> 4mg IV
+[pat half 2.pdf - Page 2]: Tylenol 1g P0
+[pat half 2.pdf - Page 2]: Paln score:
+[pat half 2.pdf - Page 2]: 8/10 -> 4/10
+[pat half 2.pdf - Page 2]: PAGE 15
+[pat half 2.pdf - Page 2]: NURSING NOTES
+[pat half 2.pdf - Page 2]: Neuro checks stable
+[pat half 2.pdf - Page 2]: No N/V
+[pat half 2.pdf - Page 2]: Pt restlng
+[pat half 2.pdf - Page 2]: Fam1ly notifled
+[pat half 2.pdf - Page 2]: PAGE 16
+[pat half 2.pdf - Page 2]: PROCEDURE NOTE
+[pat half 2.pdf - Page 2]: Procedure:
+[pat half 2.pdf - Page 2]: Closed reduction L wrist
+[pat half 2.pdf - Page 2]: <PERSON_{index}>:
+[pat half 2.pdf - Page 2]: Hematoma block
+[pat half 2.pdf - Page 2]: Outcome:
+[pat half 2.pdf - Page 2]: Successful
+[pat half 2.pdf - Page 2]: No complicat1ons
+[pat half 2.pdf - Page 2]: PAGE 17
+[pat half 2.pdf - Page 2]: DISCHARGE PLAN
+[pat half 2.pdf - Page 2]: Disposition:
+[pat half 2.pdf - Page 2]: Home
+[pat half 2.pdf - Page 2]: Mobllity:
+[pat half 2.pdf - Page 3]: Ambulatory w/ assist
+[pat half 2.pdf - Page 3]: Support:
+[pat half 2.pdf - Page 3]: Present
+[pat half 2.pdf - Page 3]: PAGE 18
+[pat half 2.pdf - Page 3]: DISCHARGE MEDICATIONS
+[pat half 2.pdf - Page 3]: lbuprOfen 600mg PRN
+[pat half 2.pdf - Page 3]: Acetaminophen 500mg PRN
+[pat half 2.pdf - Page 3]: Opioid x3 days (sim)
+[pat half 2.pdf - Page 3]: PAGE 19
+[pat half 2.pdf - Page 3]: FOLLOW-UP
+[pat half 2.pdf - Page 3]: Ortho: 7 days
+[pat half 2.pdf - Page 3]: Neuro: 7-10 days
+[pat half 2.pdf - Page 3]: RETURN IF:
+[pat half 2.pdf - Page 3]: Worsenlng headache
+[pat half 2.pdf - Page 3]: Confusion
+[pat half 2.pdf - Page 3]: SOB
+[pat half 2.pdf - Page 3]: Severe pain
+[pat half 2.pdf - Page 3]: PAGE 20
+[pat half 2.pdf - Page 3]: LEGAL / ADM1N SUMMARY
+[pat half 2.pdf - Page 3]: DX CODES:
+[pat half 2.pdf - Page 3]: S52.502A
+[pat half 2.pdf - Page 3]: S22.42XA
+[pat half 2.pdf - Page 3]: S06.0X0A
+[pat half 2.pdf - Page 3]: Mechanlsm:
+[pat half 2.pdf - Page 3]: MVC
+
+--- SUPPLEMENTAL DATA ADDED ---
+
+
+--- DOCUMENT: pat half 2.pdf ---
+[pat half 2.pdf - Page 1]: PAGE 11
+[pat half 2.pdf - Page 1]: LABORATORY RESULTS
+[pat half 2.pdf - Page 1]: CBC:
+[pat half 2.pdf - Page 1]: WBC 13.2 H
+[pat half 2.pdf - Page 1]: Hgb 12.4
+[pat half 2.pdf - Page 1]: Plt 278
+[pat half 2.pdf - Page 1]: CMP: WNL
+[pat half 2.pdf - Page 1]: Et0H: NEG
+[pat half 2.pdf - Page 1]: UA: NEG for blood
+[pat half 2.pdf - Page 1]: PAGE 12
+[pat half 2.pdf - Page 1]: ORTHOPEDIC CONSULT
+[pat half 2.pdf - Page 1]: Dx:
+[pat half 2.pdf - Page 1]: Closed distal radlus fx
+[pat half 2.pdf - Page 1]: Plan:
+[pat half 2.pdf - Page 1]: Closed reductlon
+[pat half 2.pdf - Page 1]: Sugar-tong spllnt
+[pat half 2.pdf - Page 1]: Outpt f/u
+[pat half 2.pdf - Page 1]: PAGE 13
+[pat half 2.pdf - Page 1]: <PERSON_{index}> CONSULT
+[pat half 2.pdf - Page 1]: Assessment:
+[pat half 2.pdf - Page 1]: Mlld TBI / Concusslon
+[pat half 2.pdf - Page 1]: Recs:
+[pat half 2.pdf - Page 1]: Cognltive rest
+[pat half 2.pdf - Page 1]: No drlving x72 hrs
+[pat half 2.pdf - Page 1]: F/U 1 wk
+[pat half 2.pdf - Page 1]: PAGE 14
+[pat half 2.pdf - Page 2]: PAIN MGMT
+[pat half 2.pdf - Page 2]: Meds g1ven:
+[pat half 2.pdf - Page 2]: <PERSON_{index}> 4mg IV
+[pat half 2.pdf - Page 2]: Tylenol 1g P0
+[pat half 2.pdf - Page 2]: Paln score:
+[pat half 2.pdf - Page 2]: 8/10 -> 4/10
+[pat half 2.pdf - Page 2]: PAGE 15
+[pat half 2.pdf - Page 2]: NURSING NOTES
+[pat half 2.pdf - Page 2]: Neuro checks stable
+[pat half 2.pdf - Page 2]: No N/V
+[pat half 2.pdf - Page 2]: Pt restlng
+[pat half 2.pdf - Page 2]: Fam1ly notifled
+[pat half 2.pdf - Page 2]: PAGE 16
+[pat half 2.pdf - Page 2]: PROCEDURE NOTE
+[pat half 2.pdf - Page 2]: Procedure:
+[pat half 2.pdf - Page 2]: Closed reduction L wrist
+[pat half 2.pdf - Page 2]: <PERSON_{index}>:
+[pat half 2.pdf - Page 2]: Hematoma block
+[pat half 2.pdf - Page 2]: Outcome:
+[pat half 2.pdf - Page 2]: Successful
+[pat half 2.pdf - Page 2]: No complicat1ons
+[pat half 2.pdf - Page 2]: PAGE 17
+[pat half 2.pdf - Page 2]: DISCHARGE PLAN
+[pat half 2.pdf - Page 2]: Disposition:
+[pat half 2.pdf - Page 2]: Home
+[pat half 2.pdf - Page 2]: Mobllity:
+[pat half 2.pdf - Page 3]: Ambulatory w/ assist
+[pat half 2.pdf - Page 3]: Support:
+[pat half 2.pdf - Page 3]: Present
+[pat half 2.pdf - Page 3]: PAGE 18
+[pat half 2.pdf - Page 3]: DISCHARGE MEDICATIONS
+[pat half 2.pdf - Page 3]: lbuprOfen 600mg PRN
+[pat half 2.pdf - Page 3]: Acetaminophen 500mg PRN
+[pat half 2.pdf - Page 3]: Opioid x3 days (sim)
+[pat half 2.pdf - Page 3]: PAGE 19
+[pat half 2.pdf - Page 3]: FOLLOW-UP
+[pat half 2.pdf - Page 3]: Ortho: 7 days
+[pat half 2.pdf - Page 3]: Neuro: 7-10 days
+[pat half 2.pdf - Page 3]: RETURN IF:
+[pat half 2.pdf - Page 3]: Worsenlng headache
+[pat half 2.pdf - Page 3]: Confusion
+[pat half 2.pdf - Page 3]: SOB
+[pat half 2.pdf - Page 3]: Severe pain
+[pat half 2.pdf - Page 3]: PAGE 20
+[pat half 2.pdf - Page 3]: LEGAL / ADM1N SUMMARY
+[pat half 2.pdf - Page 3]: DX CODES:
+[pat half 2.pdf - Page 3]: S52.502A
+[pat half 2.pdf - Page 3]: S22.42XA
+[pat half 2.pdf - Page 3]: S06.0X0A
+[pat half 2.pdf - Page 3]: Mechanlsm:
+[pat half 2.pdf - Page 3]: MVC
