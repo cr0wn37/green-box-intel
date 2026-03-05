@@ -1,7 +1,7 @@
 # --- CORE WEB SERVER ---
 fastapi==0.103.2
 uvicorn[standard]
-pydantic>=1.10.0,<2.0.0
+pydantic>=2.11.7
 python-multipart==0.0.22
 
 # --- AI & PII REDACTION ---
