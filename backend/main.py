@@ -9,6 +9,7 @@ import json
 import re
 from pypdf import PdfReader
 import fitz
+import gc
 from supabase import create_client, Client
 from database import supabase
 
@@ -48,8 +49,8 @@ class RenameRequest(BaseModel):
 # Initialize Clients
 app = FastAPI(title="Green Box Legal - Intelligence Infrastructure")
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-analyzer = AnalyzerEngine()
-anonymizer = AnonymizerEngine()
+analyzer = None
+anonymizer = None
 
 app = FastAPI()
 
@@ -61,6 +62,30 @@ app.add_middleware(
     allow_credentials=True,
     allow_headers=["*"],
 )
+
+def get_pii_engines():
+    """Wakes up the heavy spaCy models ONLY when a file is processed."""
+    global analyzer, anonymizer
+    
+    if analyzer is not None and anonymizer is not None:
+        return analyzer, anonymizer
+        
+    print("⏳ Booting up Presidio & spaCy into RAM...")
+    from presidio_analyzer import AnalyzerEngine
+    from presidio_anonymizer import AnonymizerEngine
+    from presidio_analyzer.nlp_engine import SpacyNlpEngine
+    
+    # Force the 12MB small model instead of the 800MB large model
+    configuration = {
+        "nlp_engine_name": "spacy",
+        "models": [{"lang_code": "en", "model_name": "en_core_web_sm"}],
+    }
+    nlp_engine = SpacyNlpEngine(models=configuration["models"])
+    
+    analyzer = AnalyzerEngine(nlp_engine=nlp_engine)
+    anonymizer = AnonymizerEngine()
+    
+    return analyzer, anonymizer
 
 # Global memory to track long-running jobs
 # In production, swap this for Redis or a Database
@@ -265,67 +290,95 @@ def get_current_safe_text(job_id: str):
 
 def process_new_pdf(file_bytes, filename, job_id):
     """
-    Standardized extraction and anonymization.
-    Updated to use 'tempfile' for Cloud/Serverless compatibility.
+    Standardized extraction and anonymization for single supplemental files.
+    UPDATED: Features Page-by-Page Memory Chunking and Lazy Loading.
     """
     # 1. Create a safe temporary file
-    # 'delete=False' so we can close it and let the PDF processor open it by name
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
         tmp.write(file_bytes)
         temp_path = tmp.name
 
     try:
-        # 2. Extract Blocks (Calls your AWS Textract wrapper)
+        # 2. Extract Blocks via AWS Textract
         blocks = process_large_legal_pdf(temp_path)
         
         if not blocks:
             print(f"⚠️ No text found in {filename}")
             return ""
 
-        # 3. Structure Text with Page Metadata
-        segments = []
+        # --- 3. CHUNKING PREP: Group lines by Page Number ---
+        page_chunks = []
+        current_page = None
+        current_page_text = []
+
         for b in blocks:
             if b.get('BlockType') == 'LINE':
                 page_num = b.get('Page', 1)
                 text = b.get('Text', '')
-                segments.append(f"[{filename} - Page {page_num}]: {text}")
+                
+                # If we hit a new page, save the old page and start a new one
+                if current_page != page_num:
+                    if current_page_text:
+                        page_chunks.append("\n".join(current_page_text))
+                    current_page = page_num
+                    current_page_text = [f"--- SOURCE FILE: {filename} | PAGE: {page_num} ---"]
+                
+                current_page_text.append(text)
         
-        raw_text = "\n".join(segments)
+        # Don't forget to append the very last page
+        if current_page_text:
+            page_chunks.append("\n".join(current_page_text))
 
-        # 4. Apply Unique Token Shield (Anonymization)
-        # (Assumes 'analyzer' and 'anonymizer' are initialized globally in main.py)
+        # --- 4. APPLY UNIQUE TOKEN SHIELD (Page-by-Page) ---
+        # Wake up the lazy-loaded PII engines
+        local_analyzer, local_anonymizer = get_pii_engines()
+        
         operators = {
             "PERSON": OperatorConfig("replace", {"new_value": "<PERSON>"}),
             "LOCATION": OperatorConfig("replace", {"new_value": "<LOCATION>"}),
             "PHONE_NUMBER": OperatorConfig("mask", {"masking_char": "*", "chars_to_mask": 10, "from_end": True})
         }
         
-        results = analyzer.analyze(text=raw_text, entities=["PERSON", "LOCATION", "PHONE_NUMBER"], language='en')
-        anonymized = anonymizer.anonymize(text=raw_text, analyzer_results=results, operators=operators)
+        safe_text_pieces = []
         
-        return anonymized.text
+        for chunk in page_chunks:
+            if len(chunk.strip()) > 0:
+                results = local_analyzer.analyze(text=chunk, entities=["PERSON", "LOCATION", "PHONE_NUMBER"], language='en')
+                anonymized = local_anonymizer.anonymize(text=chunk, analyzer_results=results, operators=operators)
+                
+                safe_text_pieces.append(anonymized.text)
+                
+                # GARBAGE COLLECTION: Keep RAM flat
+                del results
+                del anonymized
+                gc.collect()
+        
+        # 5. Glue the safe pages back together
+        return "\n".join(safe_text_pieces)
 
     except Exception as e:
         print(f"❌ Error processing supplemental PDF {filename}: {e}")
         return ""
         
     finally:
-        # 5. Cleanup: Always remove the temp file
+        # 6. Cleanup: Always remove the temp file
         if os.path.exists(temp_path):
-            os.remove(temp_path)
+            try:
+                os.remove(temp_path)
+            except: 
+                pass
 
 # --- BACKGROUND WORKER ---
 def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, total_pages: int, user_id: str):
     """
     Main AI Logic. 
-    UPDATED: Now accepts 'user_id' to ensure data is saved to the correct Supabase user.
+    UPDATED: Features Page-by-Page Memory Chunking and Lazy Loading.
     """
     try:
-        all_text_segments = []
-        
         clean_file_names = [f.strip() for f in file_names.split(',')]
+        page_chunks = [] # We will store text here grouped by page
         
-        # 2. Loop through every uploaded file and its matching original name
+        # 1. Loop through every uploaded file
         for path, original_name in zip(temp_paths, clean_file_names):
             if job_id in processing_jobs:
                 processing_jobs[job_id]["status"] = f"Extracting: {original_name}..."
@@ -334,44 +387,72 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
             if not blocks:
                 continue 
             
-            # Structure Text with the CLEAN Page Metadata
+            # --- CHUNKING PREP: Group lines by Page Number ---
+            current_page = None
+            current_page_text = []
+            
             for b in blocks:
-                if b['BlockType'] == 'LINE':
+                if b.get('BlockType') == 'LINE':
                     page_num = b.get('Page', 1)
                     text = b.get('Text', '')
-                    # INJECT THE METADATA HEADER USING THE ORIGINAL NAME
-                    all_text_segments.append(f"--- SOURCE FILE: {original_name} | PAGE: {page_num} ---\n{text}")
+                    
+                    # If we hit a new page, save the old page and start a new one
+                    if current_page != page_num:
+                        if current_page_text:
+                            page_chunks.append("\n".join(current_page_text))
+                        current_page = page_num
+                        current_page_text = [f"--- SOURCE FILE: {original_name} | PAGE: {page_num} ---"]
+                    
+                    current_page_text.append(text)
+            
+            # Don't forget to append the very last page
+            if current_page_text:
+                page_chunks.append("\n".join(current_page_text))
         
-        if not all_text_segments:
+        if not page_chunks:
             if job_id in processing_jobs:
                 processing_jobs[job_id]["status"] = "Failed: No text extracted"
             return
 
-        raw_text_combined = "\n".join(all_text_segments)
-        
+        # 2. Wake up the PII Engines (Lazy Load)
         if job_id in processing_jobs:
             processing_jobs[job_id]["status"] = "Applying Unique Token Shield..."
+            
+        local_analyzer, local_anonymizer = get_pii_engines()
         
-        # 3. PII Anonymization
         operators = {
             "PERSON": OperatorConfig("replace", {"new_value": "<PERSON_{index}>"}),
             "LOCATION": OperatorConfig("replace", {"new_value": "<LOCATION_{index}>"}),
             "PHONE_NUMBER": OperatorConfig("mask", {"masking_char": "*", "chars_to_mask": 10, "from_end": True})
         }
         
-        results = analyzer.analyze(text=raw_text_combined, entities=["PERSON", "LOCATION", "PHONE_NUMBER"], language='en')
-        anonymized = anonymizer.anonymize(text=raw_text_combined, analyzer_results=results, operators=operators)
-        safe_text = anonymized.text
+        safe_text_pieces = []
+        total_redactions = 0
+        
+        # 3. THE LIFESAVER LOOP: Process one page at a time
+        for chunk in page_chunks:
+            if len(chunk.strip()) > 0:
+                results = local_analyzer.analyze(text=chunk, entities=["PERSON", "LOCATION", "PHONE_NUMBER"], language='en')
+                anonymized = local_anonymizer.anonymize(text=chunk, analyzer_results=results, operators=operators)
+                
+                safe_text_pieces.append(anonymized.text)
+                total_redactions += len(results)
+                
+                # Manually dump the RAM after every single page
+                del results
+                del anonymized
+                gc.collect()
 
-        # Upload safe text to S3 (this function already works, no change needed)
+        # 4. Glue the safe pages back together
+        safe_text = "\n".join(safe_text_pieces)
+
+        # Upload safe text to S3
         upload_safe_text_to_s3(job_id, safe_text)
 
-        # 4. Generate Chronology (Groq/Llama/Claude)
+        # 5. Generate Chronology (Groq)
         if job_id in processing_jobs:
             processing_jobs[job_id]["status"] = "Generating Unified Chronology..."
             
-        # Note: Ensure you are passing the 'safe_text' to the model in the messages list!
-        # (Your snippet showed an empty messages list, assuming you fill it properly in your actual code)
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
@@ -398,12 +479,11 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
         report_content = response.choices[0].message.content
         total_val = calculate_total_billing(report_content)
 
-        # 5. Prepare Final Data
-        # Retrieve existing metadata from memory if available
+        # 6. Prepare Final Data
         existing_job = processing_jobs.get(job_id, {})
         existing_case_name = existing_job.get("case_name", "Unnamed Case")
-
         original_filename = existing_job.get("filename", "Document")
+        
         for path in temp_paths:
             temp_name = os.path.basename(path)
             report_content = report_content.replace(temp_name, original_filename)
@@ -411,10 +491,10 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
         final_job_data = {
             "status": "Completed",
             "chronology": report_content,
-            "total_damages": total_val,  # Changed from total_billed to match your UI
-            "redactions_count": len(results),
+            "total_damages": total_val,  
+            "redactions_count": total_redactions, # Accurate count across all pages
             "pages": total_pages, 
-            "file_list": [original_filename], # Add this so the UI sees the files
+            "file_list": [original_filename], 
             "timestamp": datetime.now().isoformat(),
             "has_chat": True,
             "case_name": existing_case_name
@@ -424,8 +504,7 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
         if job_id in processing_jobs:
             processing_jobs[job_id].update(final_job_data)
 
-        # 6. SAVE TO SUPABASE
-        # This is the critical update: passing 'user_id'
+        # 7. SAVE TO SUPABASE
         save_to_db(job_id, final_job_data, user_id)
         
     except Exception as e:
@@ -439,7 +518,6 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
                 try:
                     os.remove(path)
                 except: pass
-# --- API ROUTES ---
 
 @app.post("/process-intelligence")
 async def start_processing(
