@@ -8,7 +8,7 @@ import base64
 
 
 # 3. STATE & HELPER FUNCTIONS
-BACKEND_URL = "http://localhost:8000"
+BACKEND_URL = "https://green-box-intel.onrender.com"
 
 def show_dashboard():
 
