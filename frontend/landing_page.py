@@ -23,6 +23,19 @@ def show_landing_page():
 
     st.markdown("""
         <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden !important;}
+        [data-testid="stToolbar"] {visibility: hidden !important;}
+        [data-testid="stDecoration"] {visibility: hidden !important;}
+        [data-testid="stStatusWidget"] {visibility: hidden !important;}
+        /* This hides the "made with streamlit" in the embedded iframe */
+        .embeddedAppMetaInfoBar_container__DxxL1 {display: none !important;}
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <style>
         /* 1. Global Spacing */
         .block-container {
             padding-top: 6rem !important; 
