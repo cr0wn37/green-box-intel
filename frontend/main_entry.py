@@ -10,6 +10,10 @@ hide_st_style = """
             #MainMenu {visibility: hidden;}
             footer {visibility: hidden;}
             header {visibility: hidden;}
+            [data-testid="stToolbar"] {visibility: hidden !important;}
+            [data-testid="stDecoration"] {visibility: hidden !important;}
+            [data-testid="stStatusWidget"] {visibility: hidden !important;}
+            .embeddedAppMetaInfoBar_container__DxxL1 {display: none !important;}
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
