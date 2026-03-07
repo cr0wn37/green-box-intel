@@ -23,14 +23,27 @@ def show_landing_page():
 
     st.markdown("""
         <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
+        /* 1. Hide the entire footer container */
+        footer {visibility: hidden !important;}
+        
+        /* 2. Hide the top header/decoration bar */
         header {visibility: hidden !important;}
+        [data-testid="stHeader"] {visibility: hidden !important;}
+        [data-testid="stDecoration"] {display: none !important;}
+        
+        /* 3. Hide the hamburger menu and toolbar */
+        #MainMenu {visibility: hidden !important;}
         [data-testid="stToolbar"] {visibility: hidden !important;}
-        [data-testid="stDecoration"] {visibility: hidden !important;}
-        [data-testid="stStatusWidget"] {visibility: hidden !important;}
-        /* This hides the "made with streamlit" in the embedded iframe */
-        .embeddedAppMetaInfoBar_container__DxxL1 {display: none !important;}
+        
+        /* 4. This is the 'secret' ID that often holds the 'Built with Streamlit' text in iframes */
+        .viewerBadge_container__1QSob {display: none !important;}
+        .styles_viewerBadge__1yB_V {display: none !important;}
+        [data-testid="stStatusWidget"] {display: none !important;}
+        
+        /* 5. Remove extra padding at the bottom so it doesn't look like a footer is missing */
+        .main .block-container {
+            padding-bottom: 0rem !important;
+        }
         </style>
     """, unsafe_allow_html=True)
 
