@@ -34,6 +34,20 @@ hide_st_style = """
         padding-bottom: 0rem !important;
     }
     </style>
+<script>
+    // Remove Streamlit branding elements via JS
+    const observer = new MutationObserver(function() {
+        const footer = document.querySelector('footer');
+        if (footer) footer.style.display = 'none';
+        
+        const toolbar = document.querySelector('[data-testid="stToolbar"]');
+        if (toolbar) toolbar.style.display = 'none';
+        
+        const fullscreen = document.querySelectorAll('button[title="View fullscreen"]');
+        fullscreen.forEach(btn => btn.style.display = 'none');
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    </script>
 """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
