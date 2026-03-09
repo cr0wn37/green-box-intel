@@ -8,22 +8,29 @@ st.set_page_config(page_icon="frontend/assets/gbi3_logo.png", page_title="Green 
 # Place this in main_entry.py
 hide_st_style = """
     <style>
-    /* 1. Standard Hide (Header, Menu, Footer) */
-    #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
-
-    /* 2. Target Streamlit Cloud Specific Elements */
-    .viewerBadge_container__1QSob {display: none !important;}
-    .stAppDeployButton {display: none !important;}
-    [data-testid="stStatusWidget"] {visibility: hidden !important;}
+    #MainMenu {visibility: hidden !important;}
+    header {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
     
-    /* 3. Aggressive 'Fullscreen' removal for images/frames */
-    [data-testid="stFullScreenFrame"] {display: none !important;}
-    button[title="View fullscreen"] {visibility: hidden !important;}
-
-    /* 4. Fix bottom padding to remove the empty gray bar */
+    /* Made with Streamlit footer - multiple selectors */
+    .reportview-container .main footer {visibility: hidden !important;}
+    footer.css-1lsmgbg {display: none !important;}
+    .css-1lsmgbg.egzxvld0 {display: none !important;}
+    
+    /* Fullscreen button */
+    button[title="View fullscreen"] {display: none !important;}
+    [data-testid="StyledFullScreenButton"] {display: none !important;}
+    .stApp > header {display: none !important;}
+    
+    /* Bottom bar / toolbar */
+    .stDeployButton {display: none !important;}
+    [data-testid="stToolbar"] {display: none !important;}
+    [data-testid="stDecoration"] {display: none !important;}
+    [data-testid="stStatusWidget"] {display: none !important;}
+    
+    /* Remove bottom padding gap left behind */
     .block-container {
+        padding-top: 1rem !important;
         padding-bottom: 0rem !important;
     }
     </style>
