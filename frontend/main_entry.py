@@ -10,8 +10,9 @@ hide_st_style = """
             #MainMenu {visibility: hidden;}
             footer {visibility: hidden;}
             header {visibility: hidden;}
-            .stApp [data-testid="stFullScreenFrame"] {
-                display: none;
+            /* Added !important to force the override */
+            [data-testid="stFullScreenFrame"] {
+                display: none !important;
             }
             </style>
             """
