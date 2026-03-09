@@ -6,16 +6,27 @@ from landing_page import show_landing_page
 st.set_page_config(page_icon="frontend/assets/gbi3_logo.png", page_title="Green Box Intel", layout="wide", initial_sidebar_state="expanded")
 
 hide_st_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            header {visibility: hidden;}
-            /* Added !important to force the override */
-            [data-testid="stFullScreenFrame"] {
-                display: none !important;
-            }
-            </style>
-            """
+    <style>
+    /* 1. Hide the Main Menu, Header, and Footer */
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+
+    /* 2. Target the specific 'Built with Streamlit' bar in Community Cloud */
+    .viewerBadge_container__1QSob {display: none !important;}
+    .stAppDeployButton {display: none !important;}
+    [data-testid="stStatusWidget"] {visibility: hidden !important;}
+
+    /* 3. Aggressively hide the Fullscreen button on images/frames */
+    [data-testid="stFullScreenFrame"] {display: none !important;}
+    button[title="View fullscreen"] {visibility: hidden !important;}
+
+    /* 4. Remove extra padding that might keep the footer area visible */
+    .block-container {
+        padding-bottom: 0rem !important;
+    }
+    </style>
+"""
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
 def main():
