@@ -6,31 +6,50 @@ from landing_page import show_landing_page
 st.set_page_config(page_icon="frontend/assets/gbi3_logo.png", page_title="Green Box Intel", layout="wide", initial_sidebar_state="expanded")
 
 # Place this in main_entry.py
-st.markdown("""
+hide_st_style = """
     <style>
-    /* 1. Hide the standard elements inside your app */
-    #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
-
-    /* 2. Target the specific Streamlit Cloud badge class seen in your Inspect tool */
-    [data-testid="stStatusWidget"], .viewerBadge_container__1QSob, .stAppDeployButton {
-        display: none !important;
-    }
-
-    /* 3. THE FIX: Physically cover the bottom 50px of the screen */
-    .footer-mask {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 50px;
-        background-color: white; /* Matches your landing page */
-        z-index: 999999;
+    #MainMenu {visibility: hidden !important;}
+    header {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
+    
+    /* Made with Streamlit footer - multiple selectors */
+    .reportview-container .main footer {visibility: hidden !important;}
+    footer.css-1lsmgbg {display: none !important;}
+    .css-1lsmgbg.egzxvld0 {display: none !important;}
+    
+    /* Fullscreen button */
+    button[title="View fullscreen"] {display: none !important;}
+    [data-testid="StyledFullScreenButton"] {display: none !important;}
+    .stApp > header {display: none !important;}
+    
+    /* Bottom bar / toolbar */
+    .stDeployButton {display: none !important;}
+    [data-testid="stToolbar"] {display: none !important;}
+    [data-testid="stDecoration"] {display: none !important;}
+    [data-testid="stStatusWidget"] {display: none !important;}
+    
+    /* Remove bottom padding gap left behind */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 0rem !important;
     }
     </style>
-    <div class="footer-mask"></div>
-""", unsafe_allow_html=True)
+<script>
+    // Remove Streamlit branding elements via JS
+    const observer = new MutationObserver(function() {
+        const footer = document.querySelector('footer');
+        if (footer) footer.style.display = 'none';
+        
+        const toolbar = document.querySelector('[data-testid="stToolbar"]');
+        if (toolbar) toolbar.style.display = 'none';
+        
+        const fullscreen = document.querySelectorAll('button[title="View fullscreen"]');
+        fullscreen.forEach(btn => btn.style.display = 'none');
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    </script>
+"""
+st.markdown(hide_st_style, unsafe_allow_html=True)
 
 def main():
     # 1. Check if user is already logged in via Supabase session
