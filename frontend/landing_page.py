@@ -21,6 +21,18 @@ def show_landing_page():
     with open(image_path, "rb") as f:
         img_b64 = base64.b64encode(f.read()).decode()
 
+    hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            .stApp [data-testid="stFullScreenFrame"] {
+                display: none;
+            }
+            </style>
+            """
+    st.markdown(hide_st_style, unsafe_allow_html=True)
+
     st.markdown("""
         <style>
         /* 1. Hide the entire footer container */

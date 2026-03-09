@@ -12,6 +12,18 @@ BACKEND_URL = "https://green-box-intel.onrender.com"
 
 def show_dashboard():
 
+    hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            .stApp [data-testid="stFullScreenFrame"] {
+                display: none;
+            }
+            </style>
+            """
+    st.markdown(hide_st_style, unsafe_allow_html=True)
+
     st.markdown("""
     <style>
     /* ---------- GLOBAL ---------- */

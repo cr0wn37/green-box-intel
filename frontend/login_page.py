@@ -16,6 +16,19 @@ from backend.database import supabase, DatabaseManager
 
 def show_login_page():
     # Custom CSS for the login button (Updated to Green Box branding)
+
+    hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            .stApp [data-testid="stFullScreenFrame"] {
+                display: none;
+            }
+            </style>
+            """
+    st.markdown(hide_st_style, unsafe_allow_html=True)
+    
     st.markdown("""
         <style>
         /* Pill Button Override for Global Streamlit Buttons */
