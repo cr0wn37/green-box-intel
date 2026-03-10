@@ -382,6 +382,11 @@ def process_new_pdf(file_bytes, filename, job_id):
             except: 
                 pass
 
+bedrock_runtime = boto3.client(
+    service_name='bedrock-runtime', 
+    region_name=os.getenv('AWS_REGION', 'us-east-1')
+)
+
 # --- BACKGROUND WORKER ---
 def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, total_pages: int, user_id: str):
     """
@@ -459,7 +464,7 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
                 del anonymized
                 gc.collect()
 
-                
+
         print("DEBUG: PII Redaction Complete. Sending to Claude...") # Add this
         # 4. Glue the safe pages back together
         safe_text = "\n".join(safe_text_pieces)
