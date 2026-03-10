@@ -397,7 +397,9 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
             if job_id in processing_jobs:
                 processing_jobs[job_id]["status"] = f"Extracting: {original_name}..."
             
+            print(f"DEBUG: Starting OCR for {job_id}") # Add this
             blocks = process_large_legal_pdf(path)
+            print(f"DEBUG: OCR Complete. Found {len(blocks)} blocks") # Add this
             if not blocks:
                 continue 
             
@@ -457,6 +459,8 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
                 del anonymized
                 gc.collect()
 
+                
+        print("DEBUG: PII Redaction Complete. Sending to Claude...") # Add this
         # 4. Glue the safe pages back together
         safe_text = "\n".join(safe_text_pieces)
 
