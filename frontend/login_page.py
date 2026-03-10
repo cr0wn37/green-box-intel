@@ -15,111 +15,149 @@ sys.path.append(parent_dir)
 from backend.database import supabase, DatabaseManager
 
 def show_login_page():
-    # Custom CSS for the login button (Updated to Green Box branding)
-
-
+    # --- MODERN MONOCHROME CSS ---
     st.markdown("""
         <style>
-        /* Pill Button Override for Global Streamlit Buttons */
-        div.stButton > button:first-child {
-            background-color: #000000 !important; /* Pure black */
-            color: #FFFFFF !important;            /* Pure white */
-            font-family: 'Plus Jakarta Sans', sans-serif;
+        /* 1. Center the Logo and Headers inside the card */
+        .centered-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* 2. Style the Tabs to be Black/Gray instead of Streamlit Pink */
+        div[data-baseweb="tab-list"] {
+            gap: 24px;
+        }
+        div[data-baseweb="tab"] {
+            height: 50px;
+            white-space: break-spaces;
+            background-color: transparent !important;
+        }
+        div[data-baseweb="tab-highlight"] {
+            background-color: #000000 !important; /* Black underline for active tab */
+        }
+        div[data-baseweb="tab"] p {
+            color: #6b7280; /* Gray for inactive tabs */
+            font-weight: 500;
+        }
+        div[aria-selected="true"] p {
+            color: #000000 !important; /* Black text for active tab */
             font-weight: 600;
-            font-size: 0.95rem;
-            padding: 0.6rem 2rem;                 /* Slightly more breathing room */
-            border-radius: 999px;
-            border: 1px solid #000000;            /* Sharp edges */
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            white-space: nowrap !important;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
-        div.stButton > button:hover {
-            background-color: #1f2937 !important; /* Charcoal slate hover */
-            border-color: #1f2937 !important;
+        /* 3. Text Input Styling (Gray borders, black on focus) */
+        div[data-baseweb="input"] {
+            border-radius: 8px !important;
+            border: 1px solid #e5e7eb !important;
+            transition: all 0.2s;
+        }
+        div[data-baseweb="input"]:focus-within {
+            border-color: #000000 !important; /* Black border on click */
+            box-shadow: 0 0 0 1px #000000 !important;
+        }
+
+        /* 4. Pill Button Override (Your custom button) */
+        div.stButton > button:first-child {
+            background-color: #000000 !important;
             color: #FFFFFF !important;
-            transform: translateY(-1px);          /* Subtle lift */
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+            border-radius: 999px;
+            border: 1px solid #000000;
+            transition: all 0.2s ease-in-out;
+            width: 100%; /* Make button span full width of the card */
+            margin-top: 10px;
+        }
+        div.stButton > button:hover {
+            background-color: #374151 !important; /* Dark gray hover */
+            border-color: #374151 !important;
+            transform: translateY(-1px);
         }
         </style>
         """, unsafe_allow_html=True)
 
-    col1, col2 = st.columns([1, 14], vertical_alignment="center")
-    
-    with col1:
-        st.image("frontend/assets/gbi2_logo.svg", width=70) # Adjust width as needed
-        
-    with col2:
-        # Using HTML here removes the default heavy padding above st.title
-        st.markdown("<h1 style='padding-top: 0rem; margin-bottom: 0px;'>Green Box Intel</h1>", unsafe_allow_html=True)
-        
-    # Place the caption right below the header
-    st.caption("AI-Powered Medical Chronologies & Legal Analysis")
+    # --- LAYOUT: 3 Columns to create a centered "Card" ---
+    # The middle column (1.2) acts as the card width. The outer columns (1) are spacers.
+    spacer_left, center_card, spacer_right = st.columns([1, 1.2, 1])
 
-    st.write("")
-
-    tab1, tab2 = st.tabs(["🔐 Login", "📝 Sign Up"])
-
-    # --- LOGIN TAB ---
-    with tab1:
-        email = st.text_input("Email Address", key="login_email")
-        password = st.text_input("Password", type="password", key="login_pass")
+    with center_card:
+        # Push the card down a bit from the top of the screen
+        st.write("")
+        st.write("")
+        st.write("")
         
-        if st.button("Log In"):
-            if not email or not password:
-                st.warning("Please enter both email and password.")
-            else:
-                try:
-                    # 1. Authenticate with Supabase Auth
-                    response = supabase.auth.sign_in_with_password({"email": email, "password": password})
-                    
-                    # 2. Store Session in Streamlit
-                    st.session_state["user"] = response.user
-                    st.session_state["user_id"] = response.user.id
-                    st.session_state["access_token"] = response.session.access_token
-                    
-                    st.success("Welcome back! Redirecting...")
-                    time.sleep(1)
-                    st.rerun()
-                    
-                except Exception as e:
-                    st.error(f"Login failed: {str(e)}")
+        # Wrap everything in a container to create the physical "Card" boundary
+        with st.container(border=True):
+            
+            # --- CARD HEADER ---
+            st.markdown("""
+                <div class="centered-header">
+                    <img src="frontend/assets/gbi2_logo.svg" width="60" style="margin-bottom: 10px;">
+                    <h2 style='padding-top: 0rem; margin-bottom: 0px; color: #111827;'>Green Box Intel</h2>
+                    <p style='color: #6B7280; font-size: 0.9rem; margin-top: 5px;'>Secure Medical Chronologies</p>
+                </div>
+            """, unsafe_allow_html=True)
 
-    # --- SIGN UP TAB ---
-    with tab2:
-        st.info("Start your 1500-page trial today.")
-        new_email = st.text_input("Email Address", key="signup_email")
-        new_password = st.text_input("Password", type="password", key="signup_pass")
-        
-        if st.button("Create Account"):
-            if not new_email or not new_password:
-                st.warning("Please fill in all fields.")
-            else:
-                try:
-                    # 1. Create Auth User
-                    response = supabase.auth.sign_up({"email": new_email, "password": new_password})
-                    
-                    if response.user:
-                        user_id = response.user.id
-                        
-                        # 2. Create Profile Entry (Quota) manually
-                        # This ensures the 1500 limit is set immediately
-                        try:
-                            supabase.table("profiles").insert({
-                                "id": user_id,
-                                "email": new_email,
-                                "remaining_quota": 1500
-                            }).execute()
-                        except Exception:
-                            pass # Triggers might handle this automatically
-                        
-                        st.success("Account created! You can now log in.")
+            # --- TABS ---
+            tab1, tab2 = st.tabs(["Log In", "Create Account"])
+
+            # --- LOGIN TAB ---
+            with tab1:
+                st.write("") # Subtle spacing
+                email = st.text_input("Email Address", key="login_email", placeholder="attorney@lawfirm.com")
+                password = st.text_input("Password", type="password", key="login_pass", placeholder="••••••••")
+                
+                if st.button("Sign In"):
+                    if not email or not password:
+                        st.error("Please enter both email and password.")
                     else:
-                        st.warning("Check your email for a confirmation link.")
-                        
-                except Exception as e:
-                    st.error(f"Sign up failed: {str(e)}")
+                        with st.spinner("Authenticating..."):
+                            try:
+                                response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+                                st.session_state["user"] = response.user
+                                st.session_state["user_id"] = response.user.id
+                                st.session_state["access_token"] = response.session.access_token
+                                
+                                st.success("Access granted. Redirecting...")
+                                time.sleep(1)
+                                st.rerun()
+                            except Exception as e:
+                                st.error("Invalid email or password.") # More professional than showing the raw error
+
+            # --- SIGN UP TAB ---
+            with tab2:
+                st.write("") # Subtle spacing
+                new_email = st.text_input("Work Email", key="signup_email", placeholder="attorney@lawfirm.com")
+                new_password = st.text_input("Create Password", type="password", key="signup_pass", placeholder="Minimum 8 characters")
+                
+                if st.button("Start 1500-Page Trial"):
+                    if not new_email or not new_password:
+                        st.error("Please fill in all fields.")
+                    else:
+                        with st.spinner("Provisioning secure workspace..."):
+                            try:
+                                response = supabase.auth.sign_up({"email": new_email, "password": new_password})
+                                
+                                if response.user:
+                                    user_id = response.user.id
+                                    try:
+                                        supabase.table("profiles").insert({
+                                            "id": user_id,
+                                            "email": new_email,
+                                            "remaining_quota": 1500
+                                        }).execute()
+                                    except Exception:
+                                        pass 
+                                    
+                                    st.success("Account created! You may now log in.")
+                                else:
+                                    st.info("Check your email for a secure confirmation link.")
+                                    
+                            except Exception as e:
+                                st.error(f"Sign up failed: {str(e)}")
 
 def is_authenticated():
     """
