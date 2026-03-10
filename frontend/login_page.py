@@ -98,7 +98,7 @@ def show_login_page():
                 logo_base64 = base64.b64encode(f.read()).decode()
             
             # --- CARD HEADER ---
-            st.markdown("""
+            st.markdown(f"""
                 <div class="centered-header">
                     <img src="data:image/png;base64,{logo_base64}" width="60" style="margin-bottom: 10px;">
                     <h2 style='padding-top: 0rem; margin-bottom: 0px; color: #111827;'>Green Box Intel</h2>
