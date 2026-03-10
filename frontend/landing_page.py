@@ -22,38 +22,15 @@ def show_landing_page():
         img_b64 = base64.b64encode(f.read()).decode()
 
     st.markdown("""
-        <style>
-        /* 1. Hide the entire footer container */
-        footer {visibility: hidden !important;}
-        
-        /* 2. Hide the top header/decoration bar */
-        header {visibility: hidden !important;}
-        [data-testid="stHeader"] {visibility: hidden !important;}
-        [data-testid="stDecoration"] {display: none !important;}
-        
-        /* 3. Hide the hamburger menu and toolbar */
-        #MainMenu {visibility: hidden !important;}
-        [data-testid="stToolbar"] {visibility: hidden !important;}
-        
-        /* 4. This is the 'secret' ID that often holds the 'Built with Streamlit' text in iframes */
-        .viewerBadge_container__1QSob {display: none !important;}
-        .styles_viewerBadge__1yB_V {display: none !important;}
-        [data-testid="stStatusWidget"] {display: none !important;}
-        
-        /* 5. Remove extra padding at the bottom so it doesn't look like a footer is missing */
-        .main .block-container {
-            padding-bottom: 0rem !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    hide_streamlit_style = """
     <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
+    footer {visibility: hidden !important;}
+    header {visibility: hidden !important;} /* Keep hidden on landing page only */
+    [data-testid="stDecoration"] {display: none !important;}
+    #MainMenu {visibility: hidden !important;}
+    [data-testid="stToolbar"] {visibility: hidden !important;}
+    button[title="View fullscreen"] {display: none !important;}
     </style>
-    """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
     st.markdown("""
         <style>

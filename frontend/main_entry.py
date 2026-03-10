@@ -5,50 +5,34 @@ from landing_page import show_landing_page
 
 st.set_page_config(page_icon="frontend/assets/gbi3_logo.png", page_title="Green Box Intel", layout="wide", initial_sidebar_state="expanded")
 
-# Place this in main_entry.py
 hide_st_style = """
-    <style>
-    #MainMenu {visibility: hidden !important;}
-    header {visibility: hidden !important;}
-    footer {visibility: hidden !important;}
-    
-    /* Made with Streamlit footer - multiple selectors */
-    .reportview-container .main footer {visibility: hidden !important;}
-    footer.css-1lsmgbg {display: none !important;}
-    .css-1lsmgbg.egzxvld0 {display: none !important;}
-    
-    /* Fullscreen button */
-    button[title="View fullscreen"] {display: none !important;}
-    [data-testid="StyledFullScreenButton"] {display: none !important;}
-    .stApp > header {display: none !important;}
-    
-    /* Bottom bar / toolbar */
-    .stDeployButton {display: none !important;}
-    [data-testid="stToolbar"] {display: none !important;}
-    [data-testid="stDecoration"] {display: none !important;}
-    [data-testid="stStatusWidget"] {display: none !important;}
-    
-    /* Remove bottom padding gap left behind */
-    .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 0rem !important;
-    }
-    </style>
-<script>
-    // Remove Streamlit branding elements via JS
-    const observer = new MutationObserver(function() {
-        const footer = document.querySelector('footer');
-        if (footer) footer.style.display = 'none';
-        
-        const toolbar = document.querySelector('[data-testid="stToolbar"]');
-        if (toolbar) toolbar.style.display = 'none';
-        
-        const fullscreen = document.querySelectorAll('button[title="View fullscreen"]');
-        fullscreen.forEach(btn => btn.style.display = 'none');
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-    </script>
-"""
+            <style>
+            /* 1. Hide the footer branding */
+            footer {visibility: hidden !important;}
+            .viewerBadge_container__1QSob {display: none !important;}
+            
+            /* 2. MAKE HEADER TRANSPARENT (This brings back the sidebar button) */
+            header {background-color: transparent !important;}
+            [data-testid="stHeader"] {background-color: transparent !important;}
+            
+            /* 3. Hide the top decoration line */
+            [data-testid="stDecoration"] {display: none !important;}
+            
+            /* 4. Hide menus and toolbars */
+            #MainMenu {visibility: hidden !important;}
+            [data-testid="stToolbar"] {visibility: hidden !important;}
+            
+            /* 5. BLOCK THE FULLSCREEN ESCAPE */
+            button[title="View fullscreen"] {display: none !important;}
+            [data-testid="StyledFullScreenButton"] {display: none !important;}
+            
+            /* 6. Fix the padding */
+            .main .block-container {
+                padding-top: 2rem !important;
+                padding-bottom: 0rem !important;
+            }
+            </style>
+            """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
 def main():
