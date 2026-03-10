@@ -506,7 +506,7 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
 
         # Call the Bedrock API
         bedrock_response = bedrock_runtime.invoke_model(
-            modelId="anthropic.claude-opus-4-6-v1", # The exact ID you provisioned
+            modelId="global.anthropic.claude-opus-4-6-v1", # The exact ID you provisioned
             body=body
         )
         
