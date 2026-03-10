@@ -10,6 +10,7 @@ import re
 from pypdf import PdfReader
 import fitz
 import gc
+import boto3
 from supabase import create_client, Client
 from database import supabase
 
