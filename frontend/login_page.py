@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 import time
 import sys
-
+import base64
 
 # Add the parent directory to Python's path so it can find the backend folder
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,6 +13,8 @@ sys.path.append(parent_dir)
 
 # Now you can import from the backend folder!
 from backend.database import supabase, DatabaseManager
+
+
 
 def show_login_page():
     # --- MODERN MONOCHROME CSS ---
@@ -91,11 +93,14 @@ def show_login_page():
         
         # Wrap everything in a container to create the physical "Card" boundary
         with st.container(border=True):
+
+            with open("frontend/assets/gbi3_logo.png", "rb") as f:
+                logo_base64 = base64.b64encode(f.read()).decode()
             
             # --- CARD HEADER ---
             st.markdown("""
                 <div class="centered-header">
-                    <img src="frontend/assets/gbi3_logo.png" width="60" style="margin-bottom: 10px;">
+                    <img src="data:image/png;base64,{logo_base64}" width="60" style="margin-bottom: 10px;">
                     <h2 style='padding-top: 0rem; margin-bottom: 0px; color: #111827;'>Green Box Intel</h2>
                     <p style='color: #6B7280; font-size: 0.9rem; margin-top: 5px;'>Secure Medical Chronologies</p>
                 </div>
