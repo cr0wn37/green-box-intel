@@ -95,7 +95,7 @@ def show_login_page():
             # --- CARD HEADER ---
             st.markdown("""
                 <div class="centered-header">
-                    <img src="frontend/assets/gbi2_logo.svg" width="60" style="margin-bottom: 10px;">
+                    <img src="frontend/assets/gbi3_logo.png" width="60" style="margin-bottom: 10px;">
                     <h2 style='padding-top: 0rem; margin-bottom: 0px; color: #111827;'>Green Box Intel</h2>
                     <p style='color: #6B7280; font-size: 0.9rem; margin-top: 5px;'>Secure Medical Chronologies</p>
                 </div>
