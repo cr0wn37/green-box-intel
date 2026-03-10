@@ -5,35 +5,39 @@ from landing_page import show_landing_page
 
 st.set_page_config(page_icon="frontend/assets/gbi3_logo.png", page_title="Green Box Intel", layout="wide", initial_sidebar_state="expanded")
 
-hide_st_style = """
-            <style>
-            /* 1. Hide the footer branding */
-            footer {visibility: hidden !important;}
-            .viewerBadge_container__1QSob {display: none !important;}
-            
-            /* 2. MAKE HEADER TRANSPARENT (This brings back the sidebar button) */
-            header {background-color: transparent !important;}
-            [data-testid="stHeader"] {background-color: transparent !important;}
-            
-            /* 3. Hide the top decoration line */
-            [data-testid="stDecoration"] {display: none !important;}
-            
-            /* 4. Hide menus and toolbars */
-            #MainMenu {visibility: hidden !important;}
-            [data-testid="stToolbar"] {visibility: hidden !important;}
-            
-            /* 5. BLOCK THE FULLSCREEN ESCAPE */
-            button[title="View fullscreen"] {display: none !important;}
-            [data-testid="StyledFullScreenButton"] {display: none !important;}
-            
-            /* 6. Fix the padding */
-            .main .block-container {
-                padding-top: 2rem !important;
-                padding-bottom: 0rem !important;
-            }
-            </style>
-            """
-st.markdown(hide_st_style, unsafe_allow_html=True)
+st.markdown("""
+    <style>
+    /* 1. Kill the Footer (Multiple Selectors) */
+    footer {display: none !important; visibility: hidden !important;}
+    [data-testid="stFooter"] {display: none !important;}
+    .viewerBadge_container__1QSob {display: none !important;}
+    .styles_viewerBadge__1yB_V {display: none !important;}
+    
+    /* 2. Bring Back the Sidebar Arrow */
+    /* We make the header container transparent but NOT hidden */
+    header {
+        background-color: transparent !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* This specifically targets the Sidebar Toggle button */
+    [data-testid="stSidebarCollapsedControl"] {
+        background-color: rgba(255, 255, 255, 0.8) !important;
+        border-radius: 50% !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+        left: 10px !important;
+        top: 10px !important;
+        z-index: 999999 !important;
+    }
+
+    /* 3. Hide the rest of the junk */
+    #MainMenu {visibility: hidden !important;}
+    [data-testid="stToolbar"] {visibility: hidden !important;}
+    [data-testid="stDecoration"] {display: none !important;}
+    button[title="View fullscreen"] {display: none !important;}
+    </style>
+    """, unsafe_allow_html=True)
 
 def main():
     # 1. Check if user is already logged in via Supabase session
