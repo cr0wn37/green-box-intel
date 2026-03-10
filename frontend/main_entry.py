@@ -7,35 +7,29 @@ st.set_page_config(page_icon="frontend/assets/gbi3_logo.png", page_title="Green 
 
 st.markdown("""
     <style>
-    /* 1. Kill the Footer (Multiple Selectors) */
-    footer {display: none !important; visibility: hidden !important;}
+    /* 1. Hide the footer and all Streamlit branding */
+    footer {display: none !important;}
     [data-testid="stFooter"] {display: none !important;}
     .viewerBadge_container__1QSob {display: none !important;}
     .styles_viewerBadge__1yB_V {display: none !important;}
-    
-    /* 2. Bring Back the Sidebar Arrow */
-    /* We make the header container transparent but NOT hidden */
-    header {
-        background-color: transparent !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-    
-    /* This specifically targets the Sidebar Toggle button */
-    [data-testid="stSidebarCollapsedControl"] {
-        background-color: rgba(255, 255, 255, 0.8) !important;
-        border-radius: 50% !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-        left: 10px !important;
-        top: 10px !important;
-        z-index: 999999 !important;
-    }
+    [data-testid="stStatusWidget"] {display: none !important;}
 
-    /* 3. Hide the rest of the junk */
-    #MainMenu {visibility: hidden !important;}
-    [data-testid="stToolbar"] {visibility: hidden !important;}
+    /* 2. Make the header transparent so the sidebar arrow SURVIVES */
+    header {background-color: transparent !important; box-shadow: none !important;}
+    [data-testid="stHeader"] {background-color: transparent !important;}
+
+    /* 3. Hide the colored decoration line at the very top */
     [data-testid="stDecoration"] {display: none !important;}
-    button[title="View fullscreen"] {display: none !important;}
+
+    /* 4. Hide the hamburger menu and developer tools (but keep the arrow) */
+    #MainMenu {display: none !important;}
+    [data-testid="stToolbar"] {display: none !important;}
+
+    /* 5. Adjust padding to remove empty footer space */
+    .main .block-container {
+        padding-top: 3rem !important; 
+        padding-bottom: 0rem !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 

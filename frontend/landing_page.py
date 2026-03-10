@@ -21,33 +21,6 @@ def show_landing_page():
     with open(image_path, "rb") as f:
         img_b64 = base64.b64encode(f.read()).decode()
 
-    st.markdown("""
-    <style>
-    /* 1. Hide the footer and Streamlit branding */
-    footer {visibility: hidden !important;}
-    .viewerBadge_container__1QSob {display: none !important;}
-    
-    /* 2. Hide the top decoration line and menu but keep header container */
-    [data-testid="stDecoration"] {display: none !important;}
-    #MainMenu {visibility: hidden !important;}
-    [data-testid="stToolbar"] {visibility: hidden !important;}
-    
-    /* 3. Make the header transparent so it doesn't block your Glass Navbar, 
-       but allows the sidebar toggle (the '>' button) to show through */
-    header {
-        background-color: transparent !important;
-        height: 3rem !important; /* Give it enough height to show the button */
-    }
-    
-    /* 4. Ensure the sidebar toggle button is visible and clickable */
-    [data-testid="stHeader"] {
-        background: transparent !important;
-    }
-    
-    /* 5. Hide the fullscreen escape button */
-    button[title="View fullscreen"] {display: none !important;}
-    </style>
-""", unsafe_allow_html=True)
 
     st.markdown("""
         <style>
