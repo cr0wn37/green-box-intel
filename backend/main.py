@@ -227,16 +227,30 @@ def get_lifetime_usage(user_id: str):
         return 0
 
 def calculate_total_billing(chronology_text):
-    # 'findall' ensures we see all lists; we take the last one [-1] as the most up-to-date
-    matches = re.findall(r"TOTAL_LIST: \[(.*?)\]", chronology_text)
+    # Added \s* in case Claude adds extra spaces before the bracket
+    matches = re.findall(r"TOTAL_LIST:\s*\[(.*?)\]", chronology_text) 
+    
     if matches:
-        # Take the very last list provided by the AI
         numbers_str = matches[-1]
-        try:
-            amounts = [float(x.strip()) for x in numbers_str.split(',') if x.strip()]
-            return sum(amounts)
-        except ValueError:
-            return 0.0
+        total = 0.0
+        
+        # Split the string by commas
+        raw_items = numbers_str.split(',')
+        
+        for item in raw_items:
+            # 1. Strip whitespace and remove accidental dollar signs
+            clean_item = item.replace('$', '').replace(' ', '').strip()
+            
+            if clean_item:
+                try:
+                    # 2. Add to total item-by-item
+                    total += float(clean_item)
+                except ValueError:
+                    # 3. If one item is text ("None", "TBD"), ignore it and keep summing the rest
+                    pass 
+                    
+        return total
+        
     return 0.0
 
 def count_pdf_pages(file_content: bytes) -> int:
@@ -449,14 +463,11 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
         # Upload safe text to S3
         upload_safe_text_to_s3(job_id, safe_text)
 
-        # 5. Generate Chronology (Groq)
+        # 5. Generate Chronology (Claude 4.6 Opus via AWS Bedrock)
         if job_id in processing_jobs:
-            processing_jobs[job_id]["status"] = "Generating Unified Chronology..."
+            processing_jobs[job_id]["status"] = "Generating Unified Chronology (Claude 4.6)..."
             
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": """You are a Senior Personal Injury Paralegal. 
+        system_instructions = """You are a Senior Personal Injury Paralegal. 
                 Format your response in Markdown with the following specific sections:
                 # EXECUTIVE CASE SUMMARY
                 [Provide a 3-5 sentence professional overview of the patient's injuries, major treatments, and the 'bottom line' of the case.]
@@ -469,14 +480,30 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
                 # INJURY HIGHLIGHTS
                 [List 3-5 key clinical findings with page references. (Only once at the end)]
                 # TOTAL COST 
-               [At the end of the report, provide a DATA BLOCK for the developer. List every numerical amount found in the billing ledger in this format: TOTAL_LIST: [120.00, 450.50, 1000.00]. Do not include currency symbols in the list.]
-                """},
+                [At the end of the report, provide a DATA BLOCK for the developer. List every numerical amount found in the billing ledger in this format: TOTAL_LIST: [120.00, 450.50, 1000.00]. Do not include currency symbols in the list.]
+                """
+
+        # Formulate the payload for Claude
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 8192, # Maximum output length
+            "system": system_instructions, # Claude puts the system prompt here!
+            "messages": [
                 {"role": "user", "content": f"Redacted Content from Multiple Files:\n\n{safe_text}"}
             ],
-            temperature=0
-        )
+            "temperature": 0
+        })
 
-        report_content = response.choices[0].message.content
+        # Call the Bedrock API
+        bedrock_response = bedrock_runtime.invoke_model(
+            modelId="anthropic.claude-opus-4-6-v1", # The exact ID you provisioned
+            body=body
+        )
+        
+        # Parse the JSON response
+        response_data = json.loads(bedrock_response.get('body').read())
+        report_content = response_data.get('content')[0].get('text')
+
         total_val = calculate_total_billing(report_content)
 
         # 6. Prepare Final Data
