@@ -19,13 +19,22 @@ def main():
             st.session_state.page = None 
 
         # --- GATEKEEPER: Check if Admin has approved this user ---
+        # --- GATEKEEPER: Check if Admin has approved this user ---
         try:
             user_id = st.session_state.get("user_id")
-            res = supabase.table("profiles").select("is_approved").eq("id", user_id).single().execute()
             
-            # Simple True/False check
-            approved = res.data.get("is_approved", False) if res.data else False
+            # 1. Drop .single() so it returns an empty list instead of crashing
+            res = supabase.table("profiles").select("is_approved").eq("id", user_id).execute()
+            
+            # 2. Check if the user record actually exists in the table
+            if res.data and len(res.data) > 0:
+                # User exists, pull their approval status
+                approved = res.data[0].get("is_approved", False)
+            else:
+                # User does not exist in profiles table yet
+                approved = False
 
+            # 3. Direct the user based on approval
             if approved:
                 show_dashboard()
             else:
@@ -35,10 +44,11 @@ def main():
                 st.info("🕒 **Account Pending Verification**")
                 st.write("We are currently verifying your credentials. You will receive an email once your secure workspace is activated.")
                 
-            handle_logout() 
+                handle_logout() 
 
         except Exception as e:
             st.error(f"Actual Python Error: {e}")
+            handle_logout()
 
     # 2. Handle routing for unauthenticated users
     elif st.session_state.get("page") == "login":
