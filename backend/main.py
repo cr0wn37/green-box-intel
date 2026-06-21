@@ -57,11 +57,18 @@ anonymizer = None
 origins = [
     "http://localhost:8501",
     "http://127.0.0.1:8501",
+    
+    # Custom Domain Permutations
     "https://greenboxintel.com",
     "https://www.greenboxintel.com",
-    "https://green-box-intel-e8sp374bfsumgkgnsfp7zl.streamlit.app"
+    "http://greenboxintel.com",
+    "http://www.greenboxintel.com",
+    
+    # Streamlit Cloud Permutations (Crucial)
+    "https://green-box-intel-e8sp374bfsumgkgnsfp7zl.streamlit.app",
+    "https://green-box-intel-e8sp374bfsumgkgnsfp7zl.streamlit.app/",
+    "http://green-box-intel-e8sp374bfsumgkgnsfp7zl.streamlit.app",
 ]
-
 # Allow your Streamlit frontend to talk to this API
 app.add_middleware(
     CORSMiddleware,
