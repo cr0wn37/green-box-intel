@@ -536,11 +536,11 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
 
         # Extract the text specifically for Llama 3
         # Llama 3 stores the final text inside the "generation" key
-        extracted_intelligence = response_body.get("generation")
+        report_content = response_body.get("generation", "")
 
         # (If you need to print it to verify)
         print("Pipeline Success! Here is the AI output:")
-        print(extracted_intelligence)
+        print(report_content)
 
         total_val = calculate_total_billing(report_content)
 
