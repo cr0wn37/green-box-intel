@@ -36,9 +36,8 @@ def main():
                 
             handle_logout() 
 
-        except Exception:
-            st.error("Connection error. Please refresh the page.")
-            handle_logout()
+        except Exception as e:
+            st.error(f"Actual Python Error: {e}")
 
     # 2. Handle routing for unauthenticated users
     elif st.session_state.get("page") == "login":
