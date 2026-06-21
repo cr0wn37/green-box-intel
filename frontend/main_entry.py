@@ -25,6 +25,10 @@ def main():
             
             # 1. Drop .single() so it returns an empty list instead of crashing
             res = supabase.table("profiles").select("is_approved").eq("id", user_id).execute()
+
+            # --- 🚨 ADD THESE TWO DEBUG LINES 🚨 ---
+            st.warning(f"DEBUG - My Current Session ID: {user_id}")
+            st.info(f"DEBUG - Supabase Response Data: {res.data}")
             
             # 2. Check if the user record actually exists in the table
             if res.data and len(res.data) > 0:
