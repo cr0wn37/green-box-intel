@@ -507,20 +507,27 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
                 [At the end of the report, provide a DATA BLOCK for the developer. List every numerical amount found in the billing ledger in this format: TOTAL_LIST: [120.00, 450.50, 1000.00]. Do not include currency symbols in the list.]
                 """
 
-        # Formulate the payload for Claude
+        llama3_prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+        {system_instructions}
+
+        <|eot_id|><|start_header_id|>user<|end_header_id|>
+
+        Redacted Content from Multiple Files:
+        {safe_text}
+
+        <|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
+
+        # 2. Formulate the payload specifically for Meta Llama 3 on Bedrock
         body = json.dumps({
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 8192, # Maximum output length
-            "system": system_instructions, # Claude puts the system prompt here!
-            "messages": [
-                {"role": "user", "content": f"Redacted Content from Multiple Files:\n\n{safe_text}"}
-            ],
+            "prompt": llama3_prompt,
+            "max_gen_len": 2048,  # Llama uses max_gen_len instead of max_tokens
             "temperature": 0
         })
 
-        # Call the Bedrock API
+        # 3. Call the Bedrock API (Ensure your modelId is set to Llama 3)
         bedrock_response = bedrock_runtime.invoke_model(
-            modelId="meta.llama3-70b-instruct-v1:0", # The exact ID you provisioned
+            modelId="meta.llama3-70b-instruct-v1:0", 
             body=body
         )
         
