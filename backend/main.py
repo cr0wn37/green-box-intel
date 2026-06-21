@@ -59,7 +59,7 @@ origins = [
     "http://127.0.0.1:8501",
     "https://greenboxintel.com",
     "https://www.greenboxintel.com",
-    "https://green-box-intel.onrender.com"
+    "https://green-box-intel-e8sp374bfsumgkgnsfp7zl.streamlit.app"
 ]
 
 # Allow your Streamlit frontend to talk to this API
