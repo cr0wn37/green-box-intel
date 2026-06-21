@@ -125,41 +125,60 @@ def show_login_page():
                                 st.session_state["user"] = response.user
                                 st.session_state["user_id"] = response.user.id
                                 st.session_state["access_token"] = response.session.access_token
+
+                                st.session_state["page"] = "dashboard"
                                 
                                 st.success("Access granted. Redirecting...")
                                 time.sleep(1)
+                                st.query_params.clear()
                                 st.rerun()
                             except Exception as e:
                                 st.error("Invalid email or password.") # More professional than showing the raw error
 
             # --- SIGN UP TAB ---
+           # --- SIGN UP (REQUEST ACCESS) TAB ---
             with tab2:
                 st.write("") # Subtle spacing
+                # Professional tip: Use "Work Email" to discourage personal accounts
                 new_email = st.text_input("Work Email", key="signup_email", placeholder="attorney@lawfirm.com")
                 new_password = st.text_input("Create Password", type="password", key="signup_pass", placeholder="Minimum 8 characters")
                 
-                if st.button("Start 1500-Page Trial"):
+                if st.button("Request Access"):
                     if not new_email or not new_password:
                         st.error("Please fill in all fields.")
+                    # Basic validation to discourage Gmail/Public emails if you want
+                    elif any(domain in new_email for domain in ["@gmail", "@yahoo", "@outlook"]):
+                        st.warning("Please use your professional law firm email address.")
                     else:
-                        with st.spinner("Provisioning secure workspace..."):
+                        with st.spinner("Submitting request..."):
                             try:
+                                # 1. Create the Auth account
                                 response = supabase.auth.sign_up({"email": new_email, "password": new_password})
                                 
                                 if response.user:
                                     user_id = response.user.id
+                                    
+                                    # 2. Insert into profiles with 0 quota
                                     try:
                                         supabase.table("profiles").insert({
                                             "id": user_id,
                                             "email": new_email,
-                                            "remaining_quota": 1500
+                                            "remaining_quota": 0,
+                                            "is_approved": False  # <--- START AT ZERO
                                         }).execute()
                                     except Exception:
-                                        pass 
+                                        pass # Profile might exist via trigger
                                     
-                                    st.success("Account created! You may now log in.")
+                                    # 3. Professional Success Message
+                                    st.success("✅ Request Submitted Successfully!")
+                                    st.info("""
+                                        **Next Steps:**
+                                        1. Check your email to verify your address.
+                                        2. Our team will verify your firm's credentials.
+                                        3. Once approved, your service will be activated automatically.
+                                    """)
                                 else:
-                                    st.info("Check your email for a secure confirmation link.")
+                                    st.info("Please check your email to confirm your identity before we can process your request.")
                                     
                             except Exception as e:
                                 st.error(f"Sign up failed: {str(e)}")
