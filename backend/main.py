@@ -530,10 +530,17 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
             modelId="meta.llama3-70b-instruct-v1:0", 
             body=body
         )
-        
-        # Parse the JSON response
-        response_data = json.loads(bedrock_response.get('body').read())
-        report_content = response_data.get('content')[0].get('text')
+
+        # Read the raw response bytes into a Python dictionary
+        response_body = json.loads(bedrock_response.get("body").read())
+
+        # Extract the text specifically for Llama 3
+        # Llama 3 stores the final text inside the "generation" key
+        extracted_intelligence = response_body.get("generation")
+
+        # (If you need to print it to verify)
+        print("Pipeline Success! Here is the AI output:")
+        print(extracted_intelligence)
 
         total_val = calculate_total_billing(report_content)
 
