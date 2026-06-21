@@ -47,18 +47,25 @@ class RenameRequest(BaseModel):
     new_name: str
     user_id: str
 
-# Initialize Clients
+# Initialize Client ONCE
 app = FastAPI(title="Green Box Legal - Intelligence Infrastructure")
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 analyzer = None
 anonymizer = None
 
-app = FastAPI()
+# Explicitly list your custom domains, no wildcards!
+origins = [
+    "http://localhost:8501",
+    "http://127.0.0.1:8501",
+    "https://greenboxintel.com",
+    "https://www.greenboxintel.com",
+    "https://green-box-intel.onrender.com"
+]
 
 # Allow your Streamlit frontend to talk to this API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your specific URL
+    allow_origins=origins, 
     allow_methods=["*"],
     allow_credentials=True,
     allow_headers=["*"],
