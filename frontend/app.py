@@ -12,14 +12,7 @@ BACKEND_URL = "https://green-box-intel.onrender.com"
 
 def show_dashboard():
 
-    hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    </style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+    
 
 
     st.markdown("""

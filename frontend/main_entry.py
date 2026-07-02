@@ -10,12 +10,12 @@ if "page" not in st.session_state:
 st.set_page_config(page_icon="frontend/assets/gbi3_logo.png", page_title="Green Box Intel", layout="wide", initial_sidebar_state="expanded")
 
 hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    </style>
-"""
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden !important; display: none !important;}
+            header {visibility: hidden !important; display: none !important;}
+            </style>
+            """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 

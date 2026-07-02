@@ -14,14 +14,7 @@ sys.path.append(parent_dir)
 # Now you can import from the backend folder!
 from backend.database import supabase, DatabaseManager
 
-hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    </style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 
 def show_login_page():
     # --- MODERN MONOCHROME CSS ---
