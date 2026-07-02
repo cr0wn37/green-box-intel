@@ -1,0 +1,27 @@
+/* 1. Hide the top header bar entirely */
+[data-testid="stHeader"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 2. Hide the bottom footer */
+[data-testid="stFooter"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 3. Hide the top-right toolbar/hamburger menu */
+[data-testid="stToolbar"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* 4. Hide the Streamlit Community Cloud floating badge (The final boss) */
+.viewerBadge_container__1QSob,
+.viewerBadge_link__1S137,
+.viewerBadge_text__1JaDK,
+#viewerBadge {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
