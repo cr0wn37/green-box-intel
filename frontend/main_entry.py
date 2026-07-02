@@ -3,6 +3,7 @@ from login_page import show_login_page, is_authenticated, handle_logout
 from app import show_dashboard
 from landing_page import show_landing_page
 from backend.database import supabase
+import os
 
 if "page" not in st.session_state:
     st.session_state.page = "landing"
