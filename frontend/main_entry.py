@@ -11,9 +11,18 @@ st.set_page_config(page_icon="frontend/assets/gbi3_logo.png", page_title="Green 
 
 hide_streamlit_style = """
             <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden !important; display: none !important;}
-            header {visibility: hidden !important; display: none !important;}
+            /* Hide the main footer */
+            [data-testid="stFooter"] {visibility: hidden !important; display: none !important;}
+            
+            /* Hide the hamburger menu and top toolbar */
+            [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
+            [data-testid="stHeader"] {visibility: hidden !important; display: none !important;}
+            
+            /* Hide the "Manage App" or Viewer badge if hosted on cloud */
+            .viewerBadge_container__1QSob {visibility: hidden !important; display: none !important;}
+            
+            /* (Optional) Hide the top colorful decoration line */
+            [data-testid="stDecoration"] {visibility: hidden !important; display: none !important;}
             </style>
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
