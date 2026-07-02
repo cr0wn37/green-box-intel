@@ -21,6 +21,15 @@ def show_landing_page():
     with open(image_path, "rb") as f:
         img_b64 = base64.b64encode(f.read()).decode()
 
+    hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 
     st.markdown("""
         <style>
