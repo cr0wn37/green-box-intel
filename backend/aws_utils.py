@@ -9,6 +9,7 @@ load_dotenv()
 # Initialize clients
 s3_client = boto3.client('s3', region_name=os.getenv('AWS_REGION'))
 textract = boto3.client('textract', region_name=os.getenv('AWS_REGION'))
+bedrock_runtime = boto3.client('bedrock-runtime', region_name=os.getenv('AWS_REGION'))
 BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 
 def process_large_legal_pdf(file_path):
