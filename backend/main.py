@@ -507,36 +507,31 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
                 [At the end of the report, provide a DATA BLOCK for the developer. List every numerical amount found in the billing ledger in this format: TOTAL_LIST: [120.00, 450.50, 1000.00]. Do not include currency symbols in the list.]
                 """
 
-        llama3_prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
-
-        {system_instructions}
-
-        <|eot_id|><|start_header_id|>user<|end_header_id|>
-
-        Redacted Content from Multiple Files:
-        {safe_text}
-
-        <|eot_id|><|start_header_id|>assistant<|end_header_id|>"""
-
-        # 2. Formulate the payload specifically for Meta Llama 3 on Bedrock
         body = json.dumps({
-            "prompt": llama3_prompt,
-            "max_gen_len": 2048,  # Llama uses max_gen_len instead of max_tokens
-            "temperature": 0
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 4096,  # Claude uses max_tokens, Opus can output up to 4096
+            "system": system_instructions,
+            "temperature": 0,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": f"Redacted Content from Multiple Files:\n{safe_text}"
+                }
+            ]
         })
 
-        # 3. Call the Bedrock API (Ensure your modelId is set to Llama 3)
+        # 2. Call the Bedrock API (Using Claude 3 Opus)
         bedrock_response = bedrock_runtime.invoke_model(
-            modelId="meta.llama3-70b-instruct-v1:0", 
+            modelId="anthropic.claude-opus-4-8", 
             body=body
         )
 
-        # Read the raw response bytes into a Python dictionary
+        # 3. Read the raw response bytes into a Python dictionary
         response_body = json.loads(bedrock_response.get("body").read())
 
-        # Extract the text specifically for Llama 3
-        # Llama 3 stores the final text inside the "generation" key
-        report_content = response_body.get("generation", "")
+        # 4. Extract the text specifically for Claude 3
+        # Claude stores the final text inside the "content" array
+        report_content = response_body.get("content", [{}])[0].get("text", "")
 
         # (If you need to print it to verify)
         print("Pipeline Success! Here is the AI output:")
