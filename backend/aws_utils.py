@@ -7,9 +7,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize clients
-s3_client = boto3.client('s3', region_name=os.getenv('AWS_REGION'))
-textract = boto3.client('textract', region_name=os.getenv('AWS_REGION'))
+s3_client = boto3.client('s3', region_name='ap-south-1')
+textract = boto3.client('textract', region_name='ap-south-1')
+
+# 2. Let the AI client use 'us-east-1' from your .env file to talk to Claude 
 bedrock_runtime = boto3.client('bedrock-runtime', region_name=os.getenv('AWS_REGION'))
+
 BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 
 def process_large_legal_pdf(file_path):
