@@ -522,7 +522,7 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
 
         # 2. Call the Bedrock API (Using Claude 3 Opus)
         bedrock_response = bedrock_runtime.invoke_model(
-            modelId="anthropic.claude-opus-4-5-20251101-v1:0", 
+            modelId="global.anthropic.claude-opus-4-5-20251101-v1:0", 
             body=body
         )
 
