@@ -14,6 +14,7 @@ import boto3
 from supabase import create_client, Client
 from database import supabase
 
+
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse
 from docx import Document
