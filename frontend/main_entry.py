@@ -5,14 +5,11 @@ from landing_page import show_landing_page
 from backend.database import supabase
 import os
 
-if "page" not in st.session_state:
-    st.session_state.page = "landing"
 
 st.set_page_config(page_icon="frontend/assets/gbi3_logo.png", page_title="Green Box Intel", layout="wide", initial_sidebar_state="expanded")
 
-css_path = os.path.join(os.path.dirname(__file__), "assets", "style.css")
-with open(css_path) as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+if "page" not in st.session_state:
+    st.session_state.page = "landing"
 
 
 
@@ -65,3 +62,14 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+st.markdown("""
+    <style>
+    /* Hide the default Streamlit footer */
+    footer {visibility: hidden !important;}
+    
+    /* Hide the running/decoration line at the top of the page */
+    [data-testid="stDecoration"] {display: none !important;}
+    
+    </style>
+""", unsafe_allow_html=True)

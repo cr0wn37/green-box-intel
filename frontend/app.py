@@ -213,12 +213,7 @@ def show_dashboard():
         border: 1px solid #9CA3AF !important; /* Faded Gray */
     }
 
-    /* Fix Dropdown Arrow Icon */
-    section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
-        fill: #111827 !important;
-    }
-
-    footer {visibility: hidden;}
+    
     </style>
     """, unsafe_allow_html=True)
 
