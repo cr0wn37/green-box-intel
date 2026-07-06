@@ -8,6 +8,13 @@ import os
 
 st.set_page_config(page_icon="frontend/assets/gbi3_logo.png", page_title="Green Box Intel", layout="wide", initial_sidebar_state="expanded")
 
+hide_streamlit_style = """
+            <style>
+            footer {visibility: hidden;}     /* Hides the footer */
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 if "page" not in st.session_state:
     st.session_state.page = "landing"
 
