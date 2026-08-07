@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import base64
 
+
 def send_email(email, details):
     # This is the "Engine" that talks to Formspree
     FORMSPREE_URL = "https://formspree.io/f/xykdlvay"

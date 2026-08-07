@@ -11,8 +11,7 @@ from pypdf import PdfReader
 import fitz
 import gc
 import boto3
-from supabase import create_client, Client
-from database import supabase
+from backend.database import DatabaseManager
 
 
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException
@@ -25,7 +24,7 @@ from typing import List
 from datetime import datetime
 from fastapi import Form
 from pydantic import BaseModel
-from database import DatabaseManager
+
 
 # AI & Security Imports
 from groq import Groq
@@ -172,16 +171,18 @@ def create_word_doc_stream(text_content, job_id, filename):
 
 
 
-# Now you can use it like this:
-def get_user_cases(user_id):
-    response = supabase.table('cases').select("*").eq('user_id', user_id).execute()
-    return response.data
-
 db_manager = DatabaseManager()
+
+def get_user_cases(user_id):
+    """Fetches cases directly from AWS via the DatabaseManager."""
+    # db_manager returns a dictionary of {id: data} for the frontend sidebar.
+    # We convert it to a flat list here to match the old expected output.
+    cases_dict = db_manager.get_all_cases(user_id)
+    return list(cases_dict.values())
 
 def save_to_db(job_id: str, data: dict, user_id: str):
     """
-    Replaces JSON saving with Supabase upsert.
+    Replaces JSON saving with AWS PostgreSQL upsert.
     Bundles extra fields into the metadata dictionary.
     """
     try:
@@ -191,7 +192,6 @@ def save_to_db(job_id: str, data: dict, user_id: str):
         pages = data.get('pages', 0)
 
         # 2. Bundle extra fields into the 'metadata' bucket
-        # We use data.get() to safely pull values from the input dictionary
         metadata = {
             "filename": data.get("filename"),
             "timestamp": data.get("timestamp"),
@@ -207,39 +207,46 @@ def save_to_db(job_id: str, data: dict, user_id: str):
             job_id=job_id,
             case_name=case_name,
             chronology=chronology,
-            total_pages=pages,  # Matches the new argument name in DatabaseManager
+            total_pages=pages,
             metadata=metadata
         )
-        print(f"✅ Case {job_id} synced to Supabase (extra fields stored in metadata).")
+        print(f"✅ Case {job_id} synced to AWS RDS (extra fields stored in metadata).")
         
     except Exception as e:
-        print(f"❌ Supabase Save Error: {e}")
+        print(f"❌ AWS Save Error: {e}")
 
 USAGE_DB = "user_usage.json"
 
-def update_lifetime_usage(user_id: str, pages_to_add: int):
+def update_lifetime_usage(user_id: str, pages_to_add: int) -> int:
     """
-    Subtracts processed pages from the user's 1500-page quota in Supabase.
+    Subtracts processed pages from the user's quota in the AWS PostgreSQL database.
     """
     try:
         db_manager.update_user_quota(user_id, pages_to_add)
         
         # Fetch the new remaining amount to return it
         profile = db_manager.get_user_profile(user_id)
-        return profile['remaining_quota']
+        
+        # Safety check: ensure profile exists before grabbing the quota
+        if profile:
+            return profile.get('remaining_quota', 0)
+        return 0
     except Exception as e:
-        print(f"❌ Quota Update Error: {e}")
+        print(f"❌ AWS Quota Update Error: {e}")
         return 0
 
-def get_lifetime_usage(user_id: str):
+def get_lifetime_usage(user_id: str) -> int:
     """
-    Returns the current remaining quota for the user.
+    Returns the current remaining quota for the user directly from AWS.
     """
     try:
         profile = db_manager.get_user_profile(user_id)
-        return profile.get('remaining_quota', 0)
+        
+        if profile:
+            return profile.get('remaining_quota', 0)
+        return 0
     except Exception as e:
-        print(f"❌ Fetch Quota Error: {e}")
+        print(f"❌ AWS Fetch Quota Error: {e}")
         return 0
 
 def calculate_total_billing(chronology_text):
@@ -565,7 +572,7 @@ def run_intelligence_pipeline(job_id: str, temp_paths: list, file_names: str, to
         if job_id in processing_jobs:
             processing_jobs[job_id].update(final_job_data)
 
-        # 7. SAVE TO SUPABASE
+        # 7. SAVE TO AWS RDS
         save_to_db(job_id, final_job_data, user_id)
         
     except Exception as e:
@@ -585,7 +592,7 @@ async def start_processing(
     background_tasks: BackgroundTasks, 
     files: List[UploadFile] = File(...), 
     case_name: str = Form(None),
-    user_id: str = Form(...)  # <--- NEW: Required to link data to the user
+    user_id: str = Form(...)  # <--- Required to link data to the user
 ):
     print(f"👉 DEBUG: New Job for User: {user_id} | Case: {case_name}")
 
@@ -597,15 +604,19 @@ async def start_processing(
     job_id = str(uuid.uuid4())
     temp_paths = []
     total_pages = 0 
+    file_page_counts = {} # <--- NEW: Dictionary to remember page counts efficiently
 
     try:
         # 2. Save files safely (Cloud Compatible)
         for file in files:
             file_content = await file.read()
-            total_pages += count_pdf_pages(file_content)
+            
+            # Count pages ONCE and remember it
+            current_pages = count_pdf_pages(file_content)
+            total_pages += current_pages
+            file_page_counts[file.filename] = current_pages
             
             # Create a temp file that persists after this function finishes
-            # (The background task will delete it later)
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
                 tmp.write(file_content)
                 temp_paths.append(tmp.name)
@@ -633,7 +644,7 @@ async def start_processing(
             "user_id": user_id 
         }
 
-        # 5. Save Initial State to Supabase (Replaces JSON DB)
+        # 5. Save Initial State to AWS PostgreSQL (Replaces Supabase)
         # We save it as "Processing" so the user sees it in their dashboard immediately
         db_manager.save_case(
             user_id=user_id,
@@ -644,16 +655,12 @@ async def start_processing(
             metadata={"status": "Processing"}
         )
 
-        # 5.1 Save Individual Documents to the documents table
+        # 5.1 Save Individual Documents to the AWS documents table
         for file in files:
-            # We already have the individual page counts from Fitz
-            current_file_pages = count_pdf_pages(await file.read())
-            await file.seek(0) # Reset after reading
-            
             db_manager.save_document(
                 case_id=job_id,
                 file_name=file.filename,
-                page_count=current_file_pages
+                page_count=file_page_counts[file.filename] # <--- Grab the saved count instantly
             )
 
         # 6. Trigger Pipeline
@@ -688,16 +695,15 @@ async def check_status(job_id: str, user_id: str):
     if job_id in processing_jobs:
         return processing_jobs[job_id]
 
-    # 2. Slow Path: Check Supabase (Database)
+    # 2. Slow Path: Check AWS PostgreSQL (Database)
     try:
         # Fetch the specific case
         cases = db_manager.get_all_cases(user_id)
         job = cases.get(job_id)
         
         if job:
-            # --- NEW: Fetch related documents from the documents table ---
-            docs_res = db_manager.client.table("documents").select("*").eq("case_id", job_id).execute()
-            documents = docs_res.data if docs_res.data else []
+            # --- NEW: Fetch related documents cleanly from AWS ---
+            documents = db_manager.get_documents_by_case(job_id)
 
             return {
                 "status": "Completed" if job.get('chronology_text') else "Processing",
@@ -708,33 +714,41 @@ async def check_status(job_id: str, user_id: str):
                 "documents": documents  # Send the professional list to frontend
             }
     except Exception as e:
-        print(f"Status Check Error: {e}")
+        print(f"AWS Status Check Error: {e}")
 
     return {"status": "Job ID not found"}
 
 @app.get("/quota")
-async def get_quota(user_id: str): # <--- Needs user_id to know WHOSE quota to check
+async def get_quota(user_id: str): 
     try:
         profile = db_manager.get_user_profile(user_id)
-        used = 1500 - profile.get('remaining_quota', 1500)
+        
+        # --- NEW: Safety check in case the profile returns None ---
+        if profile:
+            remaining = profile.get('remaining_quota', 1500)
+        else:
+            remaining = 1500 # Default if no profile found
+            
+        used = 1500 - remaining
+        
         return {
             "used": used, 
             "limit": 1500, 
-            "remaining": profile.get('remaining_quota', 1500)
+            "remaining": remaining
         }
     except Exception as e:
-        print(f"Quota Error: {e}")
+        print(f"AWS Quota Error: {e}")
         return {"used": 0, "limit": 1500, "remaining": 1500}
 
 @app.get("/download-report/{job_id}")
-async def download_report(job_id: str, user_id: str): # <--- Added user_id for security
+async def download_report(job_id: str, user_id: str): 
     
     # 1. Try In-Memory first (Fastest)
     job = processing_jobs.get(job_id)
     chronology_text = ""
     filename = "Legal_Report"
 
-    # 2. If not in memory, fetch from Supabase
+    # 2. If not in memory, fetch from AWS PostgreSQL (Previously Supabase)
     if not job:
         try:
             cases = db_manager.get_all_cases(user_id)
@@ -743,7 +757,7 @@ async def download_report(job_id: str, user_id: str): # <--- Added user_id for s
                 chronology_text = job_data.get('chronology_text', "")
                 filename = job_data.get('case_name', "Legal_Report")
         except Exception as e:
-            print(f"DB Load Error: {e}")
+            print(f"AWS Load Error: {e}")
 
     # 3. If found in memory, use that text
     if job and not chronology_text:
@@ -756,7 +770,6 @@ async def download_report(job_id: str, user_id: str): # <--- Added user_id for s
 
     # 5. Generate DOCX
     try:
-        # Calls your existing helper function
         doc_stream = create_word_doc_stream(
             chronology_text, 
             job_id, 
@@ -783,7 +796,7 @@ async def download_report(job_id: str, user_id: str): # <--- Added user_id for s
 @app.get("/history")
 async def get_history(user_id: str):
     """
-    Fetches the user's case history from Supabase.
+    Fetches the user's case history from AWS PostgreSQL.
     Returns a dictionary formatted exactly like your old JSON structure.
     """
     try:
@@ -791,7 +804,7 @@ async def get_history(user_id: str):
         # It returns: { "job_id_1": {case_data}, "job_id_2": {case_data} }
         return db_manager.get_all_cases(user_id)
     except Exception as e:
-        print(f"❌ History Fetch Error: {e}")
+        print(f"❌ AWS History Fetch Error: {e}")
         return {}
 
 @app.post("/chat/{job_id}")
@@ -871,14 +884,15 @@ async def chat_with_pdf(job_id: str, payload: dict):
         return {"answer": "I encountered an error processing your request."}
 
 @app.delete("/delete/{job_id}")
-async def delete_job(job_id: str, user_id: str): # <--- Added user_id param
-    # 1. Delete from Supabase (The Database)
+async def delete_job(job_id: str, user_id: str): 
+    # 1. Delete from AWS PostgreSQL (The Database)
     try:
         # Calls the function in database.py
-        # RLS policies will ensure users can only delete their own cases
+        # Note: Ensure your database schema has 'ON DELETE CASCADE' on the documents table 
+        # so deleting a case automatically wipes its related documents!
         db_manager.delete_case(job_id, user_id)
     except Exception as e:
-        print(f"❌ DB Delete Error: {e}")
+        print(f"❌ AWS DB Delete Error: {e}")
         # We continue anyway to clean up S3 and Memory
 
     # 2. Delete from Memory (The RAM)
@@ -886,7 +900,6 @@ async def delete_job(job_id: str, user_id: str): # <--- Added user_id param
         del processing_jobs[job_id]
 
     # 3. Delete from S3 (The Cloud Storage)
-    # This prevents "Ghost Files" from costing you money
     try:
         s3_client.delete_object(Bucket=BUCKET_NAME, Key=f"safe-text/{job_id}_safe.txt")
         print(f"🗑️ Deleted S3 Safe Text for {job_id}")
@@ -900,43 +913,42 @@ async def rename_job(job_id: str, request: RenameRequest):
     new_name = request.new_name
     user_id = request.user_id
 
-    # 1. Update in Supabase
+    # 1. Update in AWS PostgreSQL
     try:
-        # We first need to fetch the existing data to preserve the chronology
-        # (Since upsert replaces the row, we don't want to lose the text!)
+        # We first need to fetch the existing data to preserve context
         current_case = db_manager.get_all_cases(user_id).get(job_id)
         
         if not current_case:
              raise HTTPException(status_code=404, detail="Case not found in database")
 
-        # Save back with the NEW name but OLD chronology/pages
+        # Save back with the NEW name but preserve OLD text, total_pages, and metadata
         db_manager.save_case(
             user_id=user_id,
             job_id=job_id,
             case_name=new_name,
             chronology=current_case.get('chronology_text', ''),
-            pages=current_case.get('total_pages', 0)
+            total_pages=current_case.get('total_pages', 0), # Corrected parameter name
+            metadata=current_case.get('metadata', {})       # Added to prevent metadata loss
         )
     except Exception as e:
-        print(f"❌ Rename DB Error: {e}")
+        print(f"❌ Rename AWS DB Error: {e}")
         raise HTTPException(status_code=500, detail="Database rename failed")
 
     # 2. Update in Memory (RAM)
-    # This ensures the user sees the new name instantly without a page refresh
     if job_id in processing_jobs:
         processing_jobs[job_id]["case_name"] = new_name
         
     return {"message": f"Renamed to '{new_name}'"}
 
+    
 @app.post("/append-files/{job_id}")
 async def append_files(
     job_id: str, 
     background_tasks: BackgroundTasks, 
     files: List[UploadFile] = File(...),
-    user_id: str = Form(...) # <--- NEW: Required for security
+    user_id: str = Form(...) 
 ):
-    # 1. Fetch Current State from Supabase (Source of Truth)
-    # We need the old chronology to append to it
+    # 1. Fetch Current State from AWS PostgreSQL (Source of Truth)
     try:
         current_cases = db_manager.get_all_cases(user_id)
         job = current_cases.get(job_id)
@@ -950,7 +962,7 @@ async def append_files(
         current_file_list = current_metadata.get("file_list", [])
         
     except Exception as e:
-        print(f"❌ DB Fetch Error: {e}")
+        print(f"❌ AWS DB Fetch Error: {e}")
         raise HTTPException(status_code=500, detail="Database error")
 
     # 2. Process New Files
@@ -966,18 +978,23 @@ async def append_files(
         new_filenames.append(file.filename)
         
         # --- PAGE COUNTING ---
-        # We use the helper function defined in main.py for consistency
         page_count = count_pdf_pages(content)
         total_new_pages += page_count
         
-        # Extract Text (Using your existing process_new_pdf helper)
-        # Note: Ensure process_new_pdf is updated to handle bytes/temp files as discussed!
+        # Extract Text
         extracted_text = process_new_pdf(content, file.filename, job_id) 
         new_text_content += f"\n\n--- SUPPLEMENTAL DOCUMENT: {file.filename} ---\n{extracted_text}"
+        
+        # --- NEW: Save individual document record to DB ---
+        try:
+            db_manager.save_document(job_id, file.filename, page_count)
+        except Exception as e:
+            print(f"⚠️ Could not log document {file.filename}: {e}")
 
     # 3. QUOTA CHECK (The Shield)
     if total_new_pages > 0:
-        if not has_enough_quota(user_id, total_new_pages):
+        # Check quota in AWS
+        if not db_manager.has_enough_quota(user_id, total_new_pages):
              raise HTTPException(status_code=403, detail="Not enough page quota for these new files.")
         
         # Deduct Quota Immediately
@@ -991,35 +1008,26 @@ async def append_files(
     updated_metadata["status"] = "Updating Chronology..."
     updated_metadata["last_updated"] = datetime.now().isoformat()
 
-    # Save the "In Progress" state to Supabase
-    # We keep the old chronology for now until the background task finishes
+    # Save the "In Progress" state cleanly to AWS
     db_manager.save_case(
         user_id=user_id,
         job_id=job_id,
         case_name=job.get("case_name"),
         chronology=old_chronology,
-        pages=job.get("total_pages", 0) + total_new_pages
+        total_pages=job.get("total_pages", 0) + total_new_pages, # Fixed parameter name
+        metadata=updated_metadata # <--- Cleanly injects the metadata here!
     )
     
-    # We also need to explicitly update the metadata column since save_case 
-    # might not expose it directly in the simplified version I gave you earlier.
-    # If your save_case doesn't handle metadata, we do a direct patch:
-    try:
-        supabase.table("cases").update({
-            "metadata": updated_metadata
-        }).eq("id", job_id).execute()
-    except Exception as e:
-        print(f"⚠️ Metadata Update Warning: {e}")
+    # (The raw supabase.table().update() block has been completely removed!)
 
     # 5. Trigger Background Task
-    # IMPORTANT: We pass 'user_id' so the background task can save the result!
     background_tasks.add_task(
         run_smart_update, 
         job_id, 
         old_chronology, 
         new_text_content, 
         total_new_pages,
-        user_id  # <--- Pass this to the background function
+        user_id  
     )
 
     return {"message": "Supplemental files received. Analysis is updating."}
@@ -1081,49 +1089,37 @@ async def run_smart_update(job_id: str, old_report: str, new_evidence_text: str,
         upload_safe_text_to_s3(job_id, combined_safe_text)
 
         # ---------------------------------------------------------
-        # 3. CRITICAL DATA SAVE STEP (Supabase)
+        # 3. CRITICAL DATA SAVE STEP (AWS PostgreSQL)
         # ---------------------------------------------------------
         
-        # A. Fetch the LATEST state from Supabase
-        # We do this to ensure we have the 'file_list' and 'case_name' 
-        # that were just updated by the append_files endpoint.
+        # A. Fetch the LATEST state from AWS
         current_case = db_manager.get_all_cases(user_id).get(job_id)
         
         if not current_case:
             print(f"❌ Critical Error: Case {job_id} disappeared from DB during update.")
             return
 
-        # B. Get Metadata
+        # B. Get & Update Metadata
         current_metadata = current_case.get('metadata') or {}
-        
-        # Update Status & Timestamp
         current_metadata["status"] = "Completed"
         current_metadata["last_updated"] = datetime.now().isoformat()
         current_metadata["total_billed"] = new_total_val
         
         # C. Handle Page Count
-        # NOTE: The 'append_files' endpoint ALREADY added 'new_page_count_int' to the DB.
-        # So we just trust the value currently in the database.
         final_page_total = current_case.get('total_pages', 0)
-        
         print(f"👉 DEBUG: Final Page Count in DB is {final_page_total}")
 
-        # D. Save Main Fields (Updates the Chronology)
+        # D. Save Main Fields & Metadata seamlessly in one call
         db_manager.save_case(
             user_id=user_id,
             job_id=job_id,
             case_name=current_case.get('case_name'), # Preserve name
             chronology=updated_report,               # Save new report
-            pages=final_page_total                   # Preserve correct count
+            total_pages=final_page_total,            # Fixed parameter name
+            metadata=current_metadata                # Pushes updated status/billing cleanly
         )
         
-        # E. Patch Metadata (Status & Billing)
-        try:
-            supabase.table("cases").update({
-                "metadata": current_metadata
-            }).eq("id", job_id).execute()
-        except Exception as e:
-            print(f"⚠️ Metadata patch warning: {e}")
+        # (The raw supabase metadata patch was completely deleted here)
 
         # F. Update Memory (For immediate Dashboard feedback)
         if job_id in processing_jobs:
@@ -1135,7 +1131,7 @@ async def run_smart_update(job_id: str, old_report: str, new_evidence_text: str,
                 "last_updated": datetime.now().isoformat()
             })
 
-        print(f"✅ Case {job_id} merged and saved to Supabase.")
+        print(f"✅ Case {job_id} merged and saved to AWS RDS.")
 
     except Exception as e:
         print(f"❌ Smart Update Failed for {job_id}: {e}")

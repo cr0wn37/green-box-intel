@@ -7,7 +7,6 @@ import fitz
 import base64
 
 
-# 3. STATE & HELPER FUNCTIONS
 BACKEND_URL = "https://green-box-intel.onrender.com"
 
 def show_dashboard():
@@ -223,7 +222,6 @@ def show_dashboard():
         st.error("Session error. Please log in again.")
         return
         
-    # --- SESSION STATE INITIALIZATION ---
     if 'viewing_history' not in st.session_state: st.session_state['viewing_history'] = False
     if "chat_history" not in st.session_state: st.session_state.chat_history = []
     if "history_data" not in st.session_state: st.session_state.history_data = {}
@@ -233,13 +231,10 @@ def show_dashboard():
         st.session_state["case_selector"] = st.session_state["pending_job_selection"]
         del st.session_state["pending_job_selection"]
 
-    # --- UPDATED FUNCTIONS ---
 
     def load_history():
         """Fetches the list of past cases for the specific user from the Backend."""
         try:
-            # ADDED: params={"user_id": user_id}
-            # This tells the backend exactly whose history to fetch
             res = requests.get(f"{BACKEND_URL}/history", params={"user_id": user_id})
             
             if res.status_code == 200:
@@ -253,7 +248,6 @@ def show_dashboard():
         except Exception as e:
             print(f"⚠️ Could not load history: {e}")
 
-    # Trigger the load (passing current user_id context)
     if not st.session_state['history_list']:
         load_history()
 
@@ -267,11 +261,8 @@ def show_dashboard():
         Handles the API call with Authentication, State Reset, and Local Cache Cleanup.
         """
         try:
-            # 1. Get the current user_id from session state
             user_id = st.session_state.get("user_id")
             
-            # 2. Call Backend to delete (Adding user_id to params)
-            # Your backend @app.delete("/delete/{job_id}") now requires a user_id param
             res = requests.delete(
                 f"{BACKEND_URL}/delete/{job_id}", 
                 params={"user_id": user_id}
@@ -283,7 +274,6 @@ def show_dashboard():
                 st.session_state['viewing_history'] = False
                 st.session_state.chat_history = []
                 
-                # 4. Remove from Local Cache immediately
                 if 'history_list' in st.session_state:
                     if isinstance(st.session_state['history_list'], dict):
                         st.session_state['history_list'].pop(job_id, None)
@@ -295,14 +285,11 @@ def show_dashboard():
         except Exception as e:
             st.error(f"Could not reach server: {e}")
 
-    # --- 4. SIDEBAR LOGIC (Supabase Auth Updated) ---
 
-    # 1. Fetch Quota (Lifetime Usage)
-    # We must pass the user_id to get the correct profile from Supabase
     try:
         quota_res = requests.get(
             f"{BACKEND_URL}/quota", 
-            params={"user_id": user_id} # <--- Required
+            params={"user_id": user_id} 
         )
         if quota_res.status_code == 200:
             quota_data = quota_res.json()
@@ -314,12 +301,12 @@ def show_dashboard():
         used_pages, limit_pages = 0, 1500
         st.sidebar.error("⚠️ Connection Error")
 
-    # 2. Fetch Active Cases (Filtered by User)
+    
     past_jobs = {}
     try:
         history_res = requests.get(
             f"{BACKEND_URL}/history", 
-            params={"user_id": user_id} # <--- Required
+            params={"user_id": user_id} 
         )
         if history_res.status_code == 200:
             past_jobs = history_res.json()
@@ -337,26 +324,22 @@ def show_dashboard():
     """, unsafe_allow_html=True)
     st.sidebar.caption("SECURE INTELLIGENCE")
 
-    # --- Progress Bar Logic ---
     real_percent = used_pages / limit_pages
-    # Visual fix: ensure bar is visible if any pages are used
     visual_percent = min(max(real_percent, 0.05) if used_pages > 0 else 0.0, 1.0)
 
     st.sidebar.progress(visual_percent)
     st.sidebar.caption(f"{used_pages} / {limit_pages} Pages Used")
     st.sidebar.divider()
 
-    # --- Dashboard & Search Box ---
     if st.sidebar.button("🗂️ View Case Dashboard", use_container_width=True):
         st.session_state['show_dashboard'] = True
         st.session_state['viewing_history'] = False
         st.session_state["case_selector"] = "None" 
         st.rerun()
 
-    # --- Dropdown Logic ---
     job_list = list(past_jobs.keys()) if past_jobs else []
-    # Sort by timestamp if available to keep recent cases on top
-    job_list.sort(key=lambda x: past_jobs[x].get('timestamp', ''), reverse=True)
+    
+    job_list.sort(key=lambda x: past_jobs[x].get('metadata', {}).get('timestamp', ''), reverse=True)
 
     options_list = ["NEW_CASE_ID"] + job_list
 
@@ -369,19 +352,17 @@ def show_dashboard():
         if case_name and case_name != "None":
             return f"📂 {case_name[:22]}"
         
-        # Fallback to filename or ID
+        
         fname = job.get('filename', job_id[:8])
         return f"📄 {fname[:22]}..."
 
     def on_case_change():
         """Wipes chat and temporary states when switching between cases."""
         st.session_state.chat_history = []
-        # Clear any temporary 'edit' states for the previous case
         for key in list(st.session_state.keys()):
             if key.startswith("edit_mode_") or key.startswith("in_"):
                 del st.session_state[key]
 
-    # 1. The Selector
     selected_job_id = st.sidebar.selectbox(
         "Your Cases",
         options=options_list,
@@ -392,7 +373,6 @@ def show_dashboard():
         on_change=on_case_change
     )
 
-    # 2. View Routing Logic
     if selected_job_id == "NEW_CASE_ID" or selected_job_id is None:
         # Handle New Case or Cleared Search
         if selected_job_id == "NEW_CASE_ID":
@@ -400,23 +380,16 @@ def show_dashboard():
             st.session_state['show_dashboard'] = False
             
     elif selected_job_id in past_jobs:
-        # User selected a specific case
         st.session_state['viewing_history'] = True
         st.session_state['show_dashboard'] = False
         
-        # AUTH UPDATE: 
-        # We pull the specific job data from our local 'past_jobs' cache.
-        # This cache was populated using the 'user_id' in the sidebar logic.
         st.session_state['history_data'] = past_jobs[selected_job_id]
 
-    # 3. Dashboard View
     if st.session_state.get('show_dashboard', False):
         st.title("🗂️ Case Dashboard")
-        # Display the email of the logged-in user for a personal touch
         st.caption(f"Account: {st.session_state['user'].email} | Total Active Cases: {len(past_jobs)}")
         st.divider()
 
-        # 1. Create a Header Row
         h1, h2, h3, h4, h5 = st.columns([0.35, 0.25, 0.15, 0.1, 0.15])
         h1.markdown("**Case Name**")
         h2.markdown("**File Name**")
@@ -425,27 +398,22 @@ def show_dashboard():
         h5.markdown("**Action**")
         st.divider()
 
-        # 2. Loop through all cases and display them
         if not past_jobs:
             st.info("No cases found. Start a new analysis in the sidebar!")
         
         for j_id, j_data in past_jobs.items():
-            # Use a container for styling
             with st.container():
                 c1, c2, c3, c4, c5 = st.columns([0.35, 0.25, 0.15, 0.1, 0.15])
                 
-                # --- CASE NAME ---
                 name = j_data.get('case_name')
                 if not name or str(name).strip().lower() == "none": 
                     name = "Unnamed Case"
                 c1.write(f"📂 **{name}**")
                 
-                # --- FILE NAME (Pulling from the new documents table) ---
                 docs = j_data.get('documents', [])
                 meta = j_data.get('metadata', {})
                 
                 if docs:
-                    # Get the first file from the documents array
                     first_fname = docs[0].get('file_name', 'Unnamed File')
                     extra_files = len(docs) - 1
                     if extra_files > 0:
@@ -453,24 +421,19 @@ def show_dashboard():
                     else:
                         c2.write(f"📄 {first_fname[:20]}...")
                 else:
-                    # Fallback for old legacy cases
                     file_list = meta.get('file_list', [])
                     if file_list:
                         c2.write(f"📄 {file_list[0][:15]}...")
                     else:
                         c2.write("📄 No files")
                 
-                # --- DATE (Checking Supabase created_at or metadata) ---
-                # Supabase usually provides 'created_at'. If not, we check metadata.
                 raw_date = j_data.get('created_at') or meta.get('timestamp')
                 date_str = str(raw_date)[:10] if raw_date else "Unknown"
                 c3.write(date_str)
                 
-                # --- PAGES (Using the correct Supabase column name) ---
                 pgs = j_data.get('total_pages', 0)
                 c4.write(f"{pgs} pgs")
                 
-                # --- ACTION BUTTON: Open Case ---
                 def open_case(target_id=j_id):
                     st.session_state["case_selector"] = target_id
                     st.session_state['viewing_history'] = True
@@ -479,9 +442,7 @@ def show_dashboard():
                 
                 c5.button("Open ↗️", key=f"open_{j_id}", on_click=open_case)
                 
-            st.divider() # Line between rows
-
-        # STOP here so we don't render the Upload screen below
+            st.divider() 
         st.stop()
 
     # 5. MAIN LAYOUT
@@ -497,10 +458,8 @@ def show_dashboard():
             if st.session_state['viewing_history']:
                 temp_job_id = st.session_state['history_data'].get('job_id')
                 
-                # --- 1. AUTHENTICATED POLLING ---
                 if temp_job_id:
                     try:
-                        # Pass user_id so the backend can verify ownership
                         check_res = requests.get(
                             f"{BACKEND_URL}/status/{temp_job_id}",
                             params={"user_id": user_id} 
@@ -513,7 +472,6 @@ def show_dashboard():
                             live_status = live_data.get('status', '')
                             current_status = st.session_state['history_data'].get('status', '')
 
-                            # Auto-refresh UI if background processing finished or pages changed
                             if (live_pages != current_pages) or (live_status != current_status and live_status == "Completed"):
                                 st.session_state['history_data'] = live_data
                                 st.rerun() 
@@ -540,14 +498,14 @@ def show_dashboard():
                             if new_name_input:
                                 try:
                                     # --- AUTHENTICATED RENAME ---
-                                    # We pass user_id inside the JSON body as required by RenameRequest model
+                                    
                                     payload = {
                                         "new_name": new_name_input,
                                         "user_id": user_id
                                     }
                                     requests.put(f"{BACKEND_URL}/rename/{selected_job_id}", json=payload)
                                     
-                                    # Update Local Cache
+                                    
                                     data['case_name'] = new_name_input
                                     st.session_state[edit_key] = False 
                                     st.toast(f"✅ Renamed to: {new_name_input}")
@@ -555,7 +513,7 @@ def show_dashboard():
                                 except Exception as e:
                                     st.error(f"Rename failed: {e}")
                     else:
-                        # 👀 VIEW MODE
+                        
                         st.markdown(f"**{c_name}**")
                         st.caption(f"Processed: {data.get('timestamp', 'Unknown')[:10]}")
 
@@ -567,7 +525,7 @@ def show_dashboard():
 
                 # --- DELETE BUTTON ---
                 with h_col3:
-                    # This uses your previously updated callback which handles the user_id
+                    
                     st.button(
                         "🗑️", 
                         type="primary", 
@@ -580,8 +538,7 @@ def show_dashboard():
                 st.divider()
                 st.markdown("**Files in this Case:**")
 
-                # --- SHOW ALL UPLOADED FILES FOR THIS CASE ---
-                # 1. Primary Method: Use the new 'documents' table array
+           
                 documents = data.get('documents', [])
 
                 if documents:
@@ -606,22 +563,19 @@ def show_dashboard():
                             unsafe_allow_html=True
                         )
                 else:
-                    # 2. Aggressive Fallback Method
                     metadata = data.get('metadata', {})
                     raw_list = metadata.get('file_list', [])
                     
-                    # If file_list is empty, try to grab the top-level filename string
                     if not raw_list:
                         raw_list = [data.get('filename', '')]
                         
-                    # Force split EVERY item just in case they were saved as "file1, file2"
                     file_list = []
                     for item in raw_list:
                         if item:
                             # Split by comma, strip whitespace, and add to the clean list
                             file_list.extend([f.strip() for f in str(item).split(',')])
                             
-                    # Remove empty strings and duplicates
+                    
                     file_list = list(set([f for f in file_list if f]))
 
                     if file_list:
@@ -640,7 +594,6 @@ def show_dashboard():
                     else:
                         st.info("No file records found.")
 
-                # 1. Create a dynamic key for the uploader
                 if 'upload_key' not in st.session_state:
                     st.session_state['upload_key'] = 0
                 
@@ -656,12 +609,11 @@ def show_dashboard():
                                     ("files", (f.name, f.getvalue(), "application/pdf")) for f in new_files
                                 ]
                                 
-                                # Send to Backend (AUTH ADDED HERE)
                                 try:
                                     res = requests.post(
                                         f"{BACKEND_URL}/append-files/{selected_job_id}", 
                                         files=files_payload,
-                                        data={"user_id": user_id} # <--- CRITICAL UPDATE
+                                        data={"user_id": user_id} # 
                                     )
                                     
                                     if res.status_code == 200:
@@ -697,27 +649,26 @@ def show_dashboard():
                 
                 if uploaded_files:
                     st.markdown("---")
-                    # --- NEW: Initialize our total pages counter ---
+                    
                     total_queue_pages = 0 
                     
                     for f in uploaded_files:
                         f_size = f.size / 1024 / 1024
                         
-                        # --- NEW: Count pages for this specific file ---
+                       
                         try:
-                            # Read the file into memory to count pages
+                            
                             doc = fitz.open(stream=f.read(), filetype="pdf")
                             page_count = len(doc)
                             total_queue_pages += page_count
                             
-                            # CRITICAL: Reset the file pointer back to the beginning!
-                            # If you don't do this, Streamlit will send a 0-byte file to your backend.
+                            
                             f.seek(0) 
                         except Exception as e:
                             page_count = "Unknown"
                             f.seek(0)
                         
-                        # Display the individual file card with its specific page count
+                       
                         st.markdown(
                             f"""
                             <div class="file-card" style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 8px; background: white;">
@@ -769,10 +720,9 @@ def show_dashboard():
                                     job_id = resp.json().get("job_id")
                                     status = "Starting"
                                     
-                                    # --- POLLING LOOP (Now Authenticated) ---
                                     while status not in ["Completed", "Failed"]:
                                         time.sleep(1.5)
-                                        # Added params={"user_id": user_id} here
+                                        
                                         res = requests.get(
                                             f"{BACKEND_URL}/status/{job_id}",
                                             params={"user_id": user_id} 
@@ -808,36 +758,35 @@ def show_dashboard():
             h1, h2 = st.columns([3, 1])
             with h1: st.subheader("Medical Chronology")
             with h2:
-                # Initialize dl_id with what is selected
+               
                 dl_id = selected_job_id
                 
-                # Retrieve current data from session
+                
                 curr_data = st.session_state.get('history_data', {})
 
-                # LOGIC FIX: If sidebar is "None" (New Case), find ID via timestamp match
-                # This handles the transition from "Processing" to "Done"
+                
                 if (dl_id == "None" or dl_id is None) and curr_data:
-                    # Try to find the matching job in our history list
+                   
                     for k, v in past_jobs.items():
                         if v.get('timestamp') == curr_data.get('timestamp'): 
                             dl_id = k
                             break
-                    # Fallback: check if the history data itself has the ID
+                    
                     if not dl_id or dl_id == "None":
                         dl_id = curr_data.get('job_id')
                 
-                # Only show button if we have a valid ID and are viewing history
+                
                 if st.session_state['viewing_history'] and dl_id and dl_id != "None":
                     # --- AUTHENTICATED DOWNLOAD ---
                     try:
-                        # Added params={'user_id': user_id}
+                        
                         response = requests.get(
                             f"{BACKEND_URL}/download-report/{dl_id}",
                             params={"user_id": user_id} 
                         )
                         
                         if response.status_code == 200:
-                            # Extract filename from headers if possible, or generate one
+                            
                             cd_header = response.headers.get('Content-Disposition')
                             fname = f"Medical_Chronology_{dl_id[:8]}.docx"
                             if cd_header and "filename=" in cd_header:
@@ -858,16 +807,16 @@ def show_dashboard():
             if st.session_state['viewing_history']:
                 data = st.session_state['history_data']
                 
-                # Metrics
+                
                 m1, m2 = st.columns(2)
 
-                # 1. Grab the metadata bucket first
+                
                 metadata = data.get('metadata', {})
 
-                # 2. Extract total_damages from inside metadata
+                
                 billed_amount = metadata.get('total_damages', 0.0)
 
-                # Fallback check
+                
                 if billed_amount is None: billed_amount = 0.0
 
                 m1.metric("Total Damages", f"${billed_amount:,.2f}")
@@ -875,16 +824,16 @@ def show_dashboard():
                 
                 st.divider()
                 
-                # Chronology Text Area
+                
                 with st.container(height=600):
-                    # Retrieve text, defaulting to 'Generating...' if empty
+                    
                     text_content = data.get('chronology', '')
                     if not text_content:
                         text_content = data.get('chronology_text', '*Analysis in progress...*')
                     
                     st.markdown(text_content)
             else:
-                # Empty State
+                
                 st.markdown(
                     """
                     <div style="text-align: center; padding: 60px; color: #94a3b8;">
@@ -903,29 +852,26 @@ def show_dashboard():
             st.caption("Ask questions about this specific case.")
 
             if st.session_state['viewing_history']:
-                # Create a scrolling container for the chat history
-                # Height ensures it doesn't push the page down indefinitely
+                
                 chat_container = st.container(height=450)
                 
-                # 1. Display Chat History
-                # We iterate through the session state to show past messages
+               
                 with chat_container:
                     for msg in st.session_state.chat_history:
                         with st.chat_message(msg["role"]):
                             st.write(msg["content"])
                 
-                # 2. Handle User Input
+                
                 if prompt := st.chat_input("Ex: What are the injuries?"):
-                    # Immediately show the user's message
+                    
                     st.session_state.chat_history.append({"role": "user", "content": prompt})
                     with chat_container:
                         st.chat_message("user").write(prompt)
                     
-                    # 3. Find the Correct Job ID
-                    # Handles the edge case where the sidebar hasn't refreshed yet
+                   
                     c_id = selected_job_id
                     if (c_id == "None" or c_id is None) and st.session_state.get('history_data'):
-                        # Fallback: Find ID by matching timestamp or grab directly from data
+                        
                         hist_data = st.session_state['history_data']
                         c_id = hist_data.get('job_id')
                         
@@ -934,13 +880,12 @@ def show_dashboard():
                                 if v.get('timestamp') == hist_data.get('timestamp'): 
                                     c_id = k; break
                     
-                    # 4. Call Backend (Authenticated)
+                    
                     if c_id and c_id != "None":
                         with chat_container:
                             with st.spinner("Analyzing..."):
                                 try:
-                                    # --- CRITICAL UPDATE ---
-                                    # We now send 'user_id' in the JSON payload
+                                    
                                     payload = {
                                         "query": prompt, 
                                         "user_id": user_id 
@@ -956,9 +901,9 @@ def show_dashboard():
                                 except Exception as e:
                                     ans = "⚠️ Connection Error. Please try again."
                             
-                            # Show and save the AI's response
+                            
                             st.chat_message("assistant").write(ans)
                             st.session_state.chat_history.append({"role": "assistant", "content": ans})
             else:
-                # Empty State
+                
                 st.info("Chat unavailable until analysis is complete.")

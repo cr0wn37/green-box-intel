@@ -1,9 +1,9 @@
 import streamlit as st
-from supabase import create_client, Client
 import os
-from dotenv import load_dotenv
-import time
 import sys
+import time
+import uuid
+import hashlib
 import base64
 
 # Add the parent directory to Python's path so it can find the backend folder
@@ -11,10 +11,13 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(parent_dir)
 
-# Now you can import from the backend folder!
-from backend.database import supabase, DatabaseManager
+# Import the SQLAlchemy engine from your new AWS backend
+from backend.database import engine
+from sqlalchemy import text
 
-
+def hash_password(password: str) -> str:
+    """Securely hashes the password using SHA-256 before saving to AWS."""
+    return hashlib.sha256(password.encode()).hexdigest()
 
 def show_login_page():
     # --- MODERN MONOCHROME CSS ---
@@ -107,98 +110,99 @@ def show_login_page():
             """, unsafe_allow_html=True)
 
             # --- TABS ---
-            tab1, tab2 = st.tabs(["Log In", "Create Account"])
+            tab1, tab2 = st.tabs(["Sign In", "Request Access"])
+    
+    # --- LOGIN TAB ---
+    with tab1:
+        st.write("") 
+        email = st.text_input("Email Address", key="login_email", placeholder="attorney@lawfirm.com")
+        password = st.text_input("Password", type="password", key="login_pass", placeholder="••••••••")
+        
+        if st.button("Sign In"):
+            if not email or not password:
+                st.error("Please enter both email and password.")
+            else:
+                with st.spinner("Authenticating..."):
+                    try:
+                        # 1. Query AWS RDS for the user's profile
+                        query = text("SELECT id, email, password_hash FROM profiles WHERE email = :email")
+                        with engine.connect() as conn:
+                            result = conn.execute(query, {"email": email}).mappings().first()
+                            
+                        # 2. Verify the hashed password matches
+                        if result and result["password_hash"] == hash_password(password):
+                            # 3. Create the secure local session
+                            st.session_state["user_id"] = result["id"]
+                            st.session_state["user_email"] = result["email"]
+                            st.session_state["page"] = "dashboard"
+                            
+                            st.success("Access granted. Redirecting...")
+                            time.sleep(1)
+                            st.query_params.clear()
+                            st.rerun()
+                        else:
+                            st.error("Invalid email or password.")
+                    except Exception as e:
+                        st.error(f"Authentication service unavailable: {str(e)}")
 
-            # --- LOGIN TAB ---
-            with tab1:
-                st.write("") # Subtle spacing
-                email = st.text_input("Email Address", key="login_email", placeholder="attorney@lawfirm.com")
-                password = st.text_input("Password", type="password", key="login_pass", placeholder="••••••••")
-                
-                if st.button("Sign In"):
-                    if not email or not password:
-                        st.error("Please enter both email and password.")
-                    else:
-                        with st.spinner("Authenticating..."):
-                            try:
-                                response = supabase.auth.sign_in_with_password({"email": email, "password": password})
-                                st.session_state["user"] = response.user
-                                st.session_state["user_id"] = response.user.id
-                                st.session_state["access_token"] = response.session.access_token
-
-                                st.session_state["page"] = "dashboard"
-                                
-                                st.success("Access granted. Redirecting...")
-                                time.sleep(1)
-                                st.query_params.clear()
-                                st.rerun()
-                            except Exception as e:
-                                st.error("Invalid email or password.") # More professional than showing the raw error
-
-            # --- SIGN UP TAB ---
-           # --- SIGN UP (REQUEST ACCESS) TAB ---
-            with tab2:
-                st.write("") # Subtle spacing
-                # Professional tip: Use "Work Email" to discourage personal accounts
-                new_email = st.text_input("Work Email", key="signup_email", placeholder="attorney@lawfirm.com")
-                new_password = st.text_input("Create Password", type="password", key="signup_pass", placeholder="Minimum 8 characters")
-                
-                if st.button("Request Access"):
-                    if not new_email or not new_password:
-                        st.error("Please fill in all fields.")
-                    # Basic validation to discourage Gmail/Public emails if you want
-                    elif any(domain in new_email for domain in ["@gmail", "@yahoo", "@outlook"]):
-                        st.warning("Please use your professional law firm email address.")
-                    else:
-                        with st.spinner("Submitting request..."):
-                            try:
-                                # 1. Create the Auth account
-                                response = supabase.auth.sign_up({"email": new_email, "password": new_password})
-                                
-                                if response.user:
-                                    user_id = response.user.id
-                                    
-                                    # 2. Insert into profiles with 0 quota
-                                    try:
-                                        supabase.table("profiles").insert({
-                                            "id": user_id,
-                                            "email": new_email,
-                                            "remaining_quota": 0,
-                                            "is_approved": False  # <--- START AT ZERO
-                                        }).execute()
-                                    except Exception:
-                                        pass # Profile might exist via trigger
-                                    
-                                    # 3. Professional Success Message
-                                    st.success("✅ Request Submitted Successfully!")
-                                    st.info("""
-                                        **Next Steps:**
-                                        1. Check your email to verify your address.
-                                        2. Our team will verify your firm's credentials.
-                                        3. Once approved, your service will be activated automatically.
-                                    """)
-                                else:
-                                    st.info("Please check your email to confirm your identity before we can process your request.")
-                                    
-                            except Exception as e:
-                                st.error(f"Sign up failed: {str(e)}")
+    # --- SIGN UP (REQUEST ACCESS) TAB ---
+    with tab2:
+        st.write("") 
+        new_email = st.text_input("Work Email", key="signup_email", placeholder="attorney@lawfirm.com")
+        new_password = st.text_input("Create Password", type="password", key="signup_pass", placeholder="Minimum 8 characters")
+        
+        if st.button("Request Access"):
+            if not new_email or not new_password:
+                st.error("Please fill in all fields.")
+            elif any(domain in new_email for domain in [ "@yahoo", "@outlook"]):
+                st.warning("Please use your professional law firm email address.")
+            else:
+                with st.spinner("Submitting request..."):
+                    try:
+                        # 1. Generate secure credentials
+                        new_user_id = str(uuid.uuid4())
+                        hashed_pw = hash_password(new_password)
+                        
+                        # 2. Insert directly into AWS profiles table
+                        insert_query = text("""
+                            INSERT INTO profiles (id, email, password_hash, remaining_quota, is_approved) 
+                            VALUES (:id, :email, :password_hash, 0, false)
+                        """)
+                        
+                        with engine.begin() as conn:
+                            conn.execute(insert_query, {
+                                "id": new_user_id,
+                                "email": new_email,
+                                "password_hash": hashed_pw
+                            })
+                            
+                        # 3. Success Feedback
+                        st.success("✅ Request Submitted Successfully!")
+                        st.info("""
+                            **Next Steps:**
+                            1. Check your email to verify your address.
+                            2. Our team will verify your firm's credentials.
+                            3. Once approved, your service will be activated automatically.
+                        """)
+                    except Exception as e:
+                        # Catch duplicate emails (PostgreSQL Unique Violation)
+                        if "duplicate key" in str(e).lower() or "uniqueviolation" in str(e).lower():
+                            st.error("An account with this email already exists.")
+                        else:
+                            st.error(f"Sign up failed: {str(e)}")
 
 def is_authenticated():
-    """
-    Returns True if user is logged in, False otherwise.
-    """
-    return "user" in st.session_state
+    """Returns True if user is logged in, False otherwise."""
+    return "user_id" in st.session_state
 
 def handle_logout():
-    """
-    Handles the 'Logout' button and clears the Supabase session.
-    """
+    """Handles the 'Logout' button and clears the local session."""
     with st.sidebar:
         st.divider()
-        st.caption(f"Logged in as: {st.session_state['user'].email}")
+        user_email = st.session_state.get('user_email', 'Unknown User')
+        st.caption(f"Logged in as: {user_email}")
+        
         if st.button("Log Out"):
-            supabase.auth.sign_out()
-            # Clear everything to prevent 'app.py' from running logic on dead data
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
