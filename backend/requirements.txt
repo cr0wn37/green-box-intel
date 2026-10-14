@@ -30,3 +30,8 @@ pypdf>=4.0.0
 # --- AWS TEXTRACT (Required if process_large_legal_pdf uses it) ---
 amazon-textract-caller==0.2.4
 amazon-textract-response-parser==0.1.48
+
+sqlalchemy
+psycopg2-binary
+
+
