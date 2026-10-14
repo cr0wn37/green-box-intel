@@ -6,4 +6,5 @@ pandas
 PyMuPDF
 click
 sqlalchemy
+psycopg[binary]
 psycopg2-binary
