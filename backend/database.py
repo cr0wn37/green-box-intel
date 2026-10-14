@@ -6,15 +6,26 @@ from sqlalchemy import create_engine, text
 load_dotenv()
 
 def init_engine():
-    """Initializes the standard SQLAlchemy connection engine for AWS RDS."""
+    # 1. Check standard environment variables (for local development via .env)
     db_url = os.getenv("DATABASE_URL")
-    
+
+    # 2. Fallback to Streamlit secrets (for Streamlit Community Cloud)
     if not db_url:
-        print("CRITICAL ERROR: DATABASE_URL missing from Environment Variables!")
+        try:
+            import streamlit as st
+            if "DATABASE_URL" in st.secrets:
+                db_url = st.secrets["DATABASE_URL"]
+        except Exception:
+            pass
+
+    if not db_url:
+        print("CRITICAL ERROR: DATABASE_URL missing from Environment Variables and Streamlit Secrets")
         raise ValueError("Missing database configuration credentials")
-        
-    # pool_pre_ping=True forces SQLAlchemy to test the connection before using it.
-    # This is critical for Streamlit apps so connections don't time out overnight.
+
+    # Ensure postgresql:// driver compatibility (SQLAlchemy 1.4+ expects postgresql://)
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+
     return create_engine(db_url, pool_pre_ping=True)
 
 # Initialize the global engine instance
