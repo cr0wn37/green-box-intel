@@ -6,12 +6,10 @@ import uuid
 import hashlib
 import base64
 
-# Add the parent directory to Python's path so it can find the backend folder
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
 sys.path.append(parent_dir)
 
-# Import the SQLAlchemy engine from your new AWS backend
 from backend.database import engine
 from sqlalchemy import text
 
@@ -20,7 +18,6 @@ def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
 def show_login_page():
-    # --- MODERN MONOCHROME CSS ---
     st.markdown("""
         <style>
         /* 1. Center the Logo and Headers inside the card */
@@ -84,23 +81,18 @@ def show_login_page():
         </style>
         """, unsafe_allow_html=True)
 
-    # --- LAYOUT: 3 Columns to create a centered "Card" ---
-    # The middle column (1.2) acts as the card width. The outer columns (1) are spacers.
     spacer_left, center_card, spacer_right = st.columns([1, 1.2, 1])
 
     with center_card:
-        # Push the card down a bit from the top of the screen
         st.write("")
         st.write("")
         st.write("")
         
-        # Wrap everything in a container to create the physical "Card" boundary
         with st.container(border=True):
 
             with open("frontend/assets/gbi3_logo.png", "rb") as f:
                 logo_base64 = base64.b64encode(f.read()).decode()
             
-            # --- CARD HEADER ---
             st.markdown(f"""
                 <div class="centered-header">
                     <img src="data:image/png;base64,{logo_base64}" width="60" style="margin-bottom: 10px;">
@@ -109,10 +101,8 @@ def show_login_page():
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TABS ---
             tab1, tab2 = st.tabs(["Sign In", "Request Access"])
     
-    # --- LOGIN TAB ---
     with tab1:
         st.write("") 
         email = st.text_input("Email Address", key="login_email", placeholder="attorney@lawfirm.com")
@@ -124,14 +114,11 @@ def show_login_page():
             else:
                 with st.spinner("Authenticating..."):
                     try:
-                        # 1. Query AWS RDS for the user's profile
                         query = text("SELECT id, email, password_hash FROM profiles WHERE email = :email")
                         with engine.connect() as conn:
                             result = conn.execute(query, {"email": email}).mappings().first()
                             
-                        # 2. Verify the hashed password matches
                         if result and result["password_hash"] == hash_password(password):
-                            # 3. Create the secure local session
                             st.session_state["user_id"] = result["id"]
                             st.session_state["user_email"] = result["email"]
                             st.session_state["page"] = "dashboard"
@@ -145,7 +132,6 @@ def show_login_page():
                     except Exception as e:
                         st.error(f"Authentication service unavailable: {str(e)}")
 
-    # --- SIGN UP (REQUEST ACCESS) TAB ---
     with tab2:
         st.write("") 
         new_email = st.text_input("Work Email", key="signup_email", placeholder="attorney@lawfirm.com")
@@ -159,11 +145,9 @@ def show_login_page():
             else:
                 with st.spinner("Submitting request..."):
                     try:
-                        # 1. Generate secure credentials
                         new_user_id = str(uuid.uuid4())
                         hashed_pw = hash_password(new_password)
                         
-                        # 2. Insert directly into AWS profiles table
                         insert_query = text("""
                             INSERT INTO profiles (id, email, password_hash, remaining_quota, is_approved) 
                             VALUES (:id, :email, :password_hash, 0, false)
@@ -176,7 +160,6 @@ def show_login_page():
                                 "password_hash": hashed_pw
                             })
                             
-                        # 3. Success Feedback
                         st.success("✅ Request Submitted Successfully!")
                         st.info("""
                             **Next Steps:**
@@ -185,7 +168,6 @@ def show_login_page():
                             3. Once approved, your service will be activated automatically.
                         """)
                     except Exception as e:
-                        # Catch duplicate emails (PostgreSQL Unique Violation)
                         if "duplicate key" in str(e).lower() or "uniqueviolation" in str(e).lower():
                             st.error("An account with this email already exists.")
                         else:

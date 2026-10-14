@@ -5,3 +5,5 @@ supabase
 pandas
 PyMuPDF
 click
+sqlalchemy
+psycopg2-binary
