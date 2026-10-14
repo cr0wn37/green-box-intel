@@ -11,6 +11,12 @@ from pypdf import PdfReader
 import fitz
 import gc
 import boto3
+import os
+import sys
+
+# Ensure both root directory and backend directory are on Python's path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from backend.database import DatabaseManager
 
 
